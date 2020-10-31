@@ -56,7 +56,7 @@ void btnsread(void);		//Чтение нажатых кнопочек.
 void heater_shift(void);	//������������ ��������� �����������
 void read_temp (void);		//Чтение текущей температуры из MAX6675
 void convert_temp(uint16_t temp);
-void set_default_temp(void); //Установка температуры по умолчанию после загрузки (Инженерный режим)
+//void set_default_temp(void); //Установка температуры по умолчанию после загрузки (Инженерный режим)
 void SPI_init(void);		//Инициализация аппаратного SPI
 int16_t max6675_read(void); //Читаем температуру.
 void EEPROM_write(unsigned int uiAddress, unsigned char ucData); //Запись в EEPROM
@@ -134,24 +134,24 @@ int main(void)
 		}
 		if (timerManager[1]>100){
 			switch (menuNum){
-				case 1:memccpy(screen,DEF,0,3);break;
-				case 2:memccpy(screen,MOD,0,3);break;
-				case 3:memccpy(screen,PID,0,3);break;
-				case 4:memccpy(screen,HYS,0,3);break;
-				case 5:memccpy(screen,CAL,0,3);break;
-				case 10:set_default_temp();break;//Выбор температуры по-умолчанию
-				case 20:memccpy(screen,PID,0,3);break;
-				case 21:memccpy(screen,HYS,0,3);break;
-				case 22:memccpy(screen,REL,0,3);break;
-				case 30:memccpy(screen,SET,0,3);break;
-				case 31:memccpy(screen,CAL,0,3);break;
-				case 40:memccpy(screen,MAX,0,3);break;
-				case 41:memccpy(screen,MIN,0,3);break;
-				case 50:convert_temp(0);break;
-				case 51:convert_temp(500);break;
-				case 300:memccpy(screen,PID_P,0,3);break;
-				case 301:memccpy(screen,PID_I,0,3);break;
-				case 302:memccpy(screen,PID_D,0,3);break;
+				//case 1:memccpy(screen,DEF,0,3);break;
+				case 1:memccpy(screen,MOD,0,3);break;
+				case 2:memccpy(screen,PID,0,3);break;
+				case 3:memccpy(screen,HYS,0,3);break;
+				case 4:memccpy(screen,CAL,0,3);break;
+				//case 10:set_default_temp();break;//Выбор температуры по-умолчанию
+				case 10:memccpy(screen,PID,0,3);break;
+				case 11:memccpy(screen,HYS,0,3);break;
+				case 12:memccpy(screen,REL,0,3);break;
+				case 20:memccpy(screen,SET,0,3);break;
+				case 21:memccpy(screen,CAL,0,3);break;
+				case 30:memccpy(screen,MAX,0,3);break;
+				case 31:memccpy(screen,MIN,0,3);break;
+				case 40:convert_temp(0);break;
+				case 41:convert_temp(500);break;
+				case 200:memccpy(screen,PID_P,0,3);break;
+				case 201:memccpy(screen,PID_I,0,3);break;
+				case 202:memccpy(screen,PID_D,0,3);break;
 				default:
 					if(lastAct==1)menuNum/=10;
 					if(lastAct==2)menuNum--;
@@ -172,11 +172,8 @@ int main(void)
 					case BTN3:menuNum--;lastAct=3; break;
 					case BTN4:menuNum/=10;lastAct=4; break;
 				}
-				while ((PINB&BTN_MASK)!=BTN_MASK){
-					PORTA=0x00;
-				}	//Пока кнопку не отпустят - стопорим дальнейшее выполнение.
+				while ((PINB&BTN_MASK)!=BTN_MASK){PORTA=0x00;}	//Пока кнопку не отпустят - стопорим дальнейшее выполнение.
 			}
-
 			if (menuNum<=0 && lastAct==4){ //Продолжаем загрузку в нормальном режиме.
 				flags=NORMAL_MODE;
 				PORTA &= ~(1<<7);
@@ -184,6 +181,8 @@ int main(void)
 			timerManager[2]=0;
 		}
 	}
+//------------------------------------------------------------------	
+//Основное рабочее тело программы.
 //------------------------------------------------------------------
     while (1) 
     {
@@ -306,6 +305,17 @@ void btnsread(void){
 				flags &=~(TEMPERATURE_SET_MODE);	//��������� ����� ��������� �����������
 				flags |=NORMAL_MODE;				//��������� � ������� �����
 				set_temp = sel_temp<<2;
+
+				ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+					int16_t eeprom_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Читаем температуру из EEPROM
+					eeprom_temp <<=8;
+					eeprom_temp |=EEPROM_read(DEFAULT_TEMP_LBYTE);		
+					if (eeprom_temp!=sel_temp){					//Если значение установленной температуры отличается от того, что есть в EEPROM - перезаписываем.
+						EEPROM_write(DEFAULT_TEMP_HBYTE, (unsigned char)(sel_temp>>8));
+						EEPROM_write(DEFAULT_TEMP_LBYTE,(unsigned char)sel_temp);	
+					}
+				}
+
 				break;
 	}
 	}else if (flags&ENGENEER_MODE){
