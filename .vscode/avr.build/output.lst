@@ -9,7 +9,7 @@ __vectors():
    0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
    4:	0c 94 47 00 	jmp	0x8e	; 0x8e <__bad_interrupt>
    8:	0c 94 47 00 	jmp	0x8e	; 0x8e <__bad_interrupt>
-   c:	0c 94 af 00 	jmp	0x15e	; 0x15e <__vector_3>
+   c:	0c 94 b6 00 	jmp	0x16c	; 0x16c <__vector_3>
   10:	0c 94 47 00 	jmp	0x8e	; 0x8e <__bad_interrupt>
   14:	0c 94 47 00 	jmp	0x8e	; 0x8e <__bad_interrupt>
   18:	0c 94 47 00 	jmp	0x8e	; 0x8e <__bad_interrupt>
@@ -42,19 +42,19 @@ __do_copy_data():
   60:	10 e0       	ldi	r17, 0x00	; 0
   62:	a0 e6       	ldi	r26, 0x60	; 96
   64:	b0 e0       	ldi	r27, 0x00	; 0
-  66:	ea ed       	ldi	r30, 0xDA	; 218
-  68:	fa e0       	ldi	r31, 0x0A	; 10
+  66:	ea e4       	ldi	r30, 0x4A	; 74
+  68:	f9 e0       	ldi	r31, 0x09	; 9
   6a:	02 c0       	rjmp	.+4      	; 0x70 <__do_copy_data+0x10>
   6c:	05 90       	lpm	r0, Z+
   6e:	0d 92       	st	X+, r0
-  70:	aa 3a       	cpi	r26, 0xAA	; 170
+  70:	a6 3a       	cpi	r26, 0xA6	; 166
   72:	b1 07       	cpc	r27, r17
   74:	d9 f7       	brne	.-10     	; 0x6c <__do_copy_data+0xc>
 
 00000076 <__do_clear_bss>:
 __do_clear_bss():
   76:	20 e0       	ldi	r18, 0x00	; 0
-  78:	aa ea       	ldi	r26, 0xAA	; 170
+  78:	a6 ea       	ldi	r26, 0xA6	; 166
   7a:	b0 e0       	ldi	r27, 0x00	; 0
   7c:	01 c0       	rjmp	.+2      	; 0x80 <.do_clear_bss_start>
 
@@ -62,128 +62,155 @@ __do_clear_bss():
   7e:	1d 92       	st	X+, r1
 
 00000080 <.do_clear_bss_start>:
-  80:	ab 3b       	cpi	r26, 0xBB	; 187
+  80:	a6 3b       	cpi	r26, 0xB6	; 182
   82:	b2 07       	cpc	r27, r18
   84:	e1 f7       	brne	.-8      	; 0x7e <.do_clear_bss_loop>
 .do_clear_bss_start():
-  86:	0e 94 d6 00 	call	0x1ac	; 0x1ac <main>
-  8a:	0c 94 6b 05 	jmp	0xad6	; 0xad6 <_exit>
+  86:	0e 94 dd 00 	call	0x1ba	; 0x1ba <main>
+  8a:	0c 94 a3 04 	jmp	0x946	; 0x946 <_exit>
 
 0000008e <__bad_interrupt>:
 __vector_1():
   8e:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
-00000092 <EEPROM_write>:
-EEPROM_write():
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:353
-    return full_data;    				//Возвращаем прочитанное значение.
+00000092 <EEPROM_read>:
+EEPROM_read():
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:453
+	/* Start eeprom write by setting EEWE */
+	EECR |= (1<<EEWE);
 }
-void EEPROM_write(unsigned int uiAddress, unsigned char ucData)
-{
-/* Wait for completion of previous write */
-while(EECR & (1<<EEWE))
+unsigned char EEPROM_read(unsigned int uiAddress){
+	/* Wait for completion of previous write */
+	while(EECR & (1<<EEWE))
   92:	e1 99       	sbic	0x1c, 1	; 28
-  94:	fe cf       	rjmp	.-4      	; 0x92 <EEPROM_write>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:356
-;
-/* Set up address and data registers */
-EEAR = uiAddress;
+  94:	fe cf       	rjmp	.-4      	; 0x92 <EEPROM_read>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:456
+	;
+	/* Set up address register */
+	EEAR = uiAddress;
   96:	9f bb       	out	0x1f, r25	; 31
   98:	8e bb       	out	0x1e, r24	; 30
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:357
-EEDR = ucData;
-  9a:	6d bb       	out	0x1d, r22	; 29
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:359
-/* Write logical one to EEMWE */
-EECR |= (1<<EEMWE);
-  9c:	e2 9a       	sbi	0x1c, 2	; 28
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:361
-/* Start eeprom write by setting EEWE */
-EECR |= (1<<EEWE);
-  9e:	e1 9a       	sbi	0x1c, 1	; 28
-  a0:	08 95       	ret
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:458
+	/* Start eeprom read by writing EERE */
+	EECR |= (1<<EERE);
+  9a:	e0 9a       	sbi	0x1c, 0	; 28
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:460
+	/* Return data from data register */
+	return EEDR;
+  9c:	8d b3       	in	r24, 0x1d	; 29
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:461
+  9e:	08 95       	ret
 
-000000a2 <prnt>:
+000000a0 <EEPROM_write>:
+EEPROM_write():
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:442
+	PORTD |= (1<<0);					//Отпускаем SS. Конец приема.
+    return full_data;    				//Возвращаем прочитанное значение.
+}
+void EEPROM_write(unsigned int uiAddress, unsigned char ucData){
+	/* Wait for completion of previous write */
+	while(EECR & (1<<EEWE));
+  a0:	e1 99       	sbic	0x1c, 1	; 28
+  a2:	fe cf       	rjmp	.-4      	; 0xa0 <EEPROM_write>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:444
+	/* Set up address and data registers */
+	EEAR = uiAddress;
+  a4:	9f bb       	out	0x1f, r25	; 31
+  a6:	8e bb       	out	0x1e, r24	; 30
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:445
+	EEDR = ucData;
+  a8:	6d bb       	out	0x1d, r22	; 29
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:447
+	/* Write logical one to EEMWE */
+	EECR |= (1<<EEMWE);
+  aa:	e2 9a       	sbi	0x1c, 2	; 28
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:449
+	/* Start eeprom write by setting EEWE */
+	EECR |= (1<<EEWE);
+  ac:	e1 9a       	sbi	0x1c, 1	; 28
+  ae:	08 95       	ret
+
+000000b0 <prnt>:
 prnt():
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:245
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:246
 		timerManager[i]++;
 	}
 }
 void prnt(void){
 	static uint8_t digit_num;
 		switch (digit_num){
-  a2:	80 91 ba 00 	lds	r24, 0x00BA	; 0x8000ba <digit_num.2198>
-  a6:	81 30       	cpi	r24, 0x01	; 1
-  a8:	d1 f0       	breq	.+52     	; 0xde <prnt+0x3c>
-  aa:	68 f0       	brcs	.+26     	; 0xc6 <prnt+0x24>
-  ac:	82 30       	cpi	r24, 0x02	; 2
-  ae:	29 f5       	brne	.+74     	; 0xfa <prnt+0x58>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:255
+  b0:	80 91 b5 00 	lds	r24, 0x00B5	; 0x8000b5 <digit_num.2192>
+  b4:	81 30       	cpi	r24, 0x01	; 1
+  b6:	d1 f0       	breq	.+52     	; 0xec <prnt+0x3c>
+  b8:	68 f0       	brcs	.+26     	; 0xd4 <prnt+0x24>
+  ba:	82 30       	cpi	r24, 0x02	; 2
+  bc:	29 f5       	brne	.+74     	; 0x108 <prnt+0x58>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:256
 			case 1:
 				PORTC = ((PORTC&0x08)|0x02); PORTA=((PORTA&0x80)|screen[1]);
 				digit_num=2;
 				break;
 			case 2:
 				PORTC = ((PORTC&0x08)|0x04); PORTA=((PORTA&0x80)|screen[2]);
-  b0:	85 b3       	in	r24, 0x15	; 21
-  b2:	88 70       	andi	r24, 0x08	; 8
-  b4:	84 60       	ori	r24, 0x04	; 4
-  b6:	85 bb       	out	0x15, r24	; 21
-  b8:	8b b3       	in	r24, 0x1b	; 27
-  ba:	80 78       	andi	r24, 0x80	; 128
-  bc:	90 91 78 00 	lds	r25, 0x0078	; 0x800078 <screen+0x2>
-  c0:	89 2b       	or	r24, r25
-  c2:	8b bb       	out	0x1b, r24	; 27
-  c4:	1a c0       	rjmp	.+52     	; 0xfa <prnt+0x58>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:247
+  be:	85 b3       	in	r24, 0x15	; 21
+  c0:	88 70       	andi	r24, 0x08	; 8
+  c2:	84 60       	ori	r24, 0x04	; 4
+  c4:	85 bb       	out	0x15, r24	; 21
+  c6:	8b b3       	in	r24, 0x1b	; 27
+  c8:	80 78       	andi	r24, 0x80	; 128
+  ca:	90 91 77 00 	lds	r25, 0x0077	; 0x800077 <screen+0x2>
+  ce:	89 2b       	or	r24, r25
+  d0:	8b bb       	out	0x1b, r24	; 27
+  d2:	1a c0       	rjmp	.+52     	; 0x108 <prnt+0x58>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:248
 }
 void prnt(void){
 	static uint8_t digit_num;
 		switch (digit_num){
 			case 0:
 				PORTC = ((PORTC&0x08)|0x01); PORTA=((PORTA&0x80)|screen[0]);
-  c6:	85 b3       	in	r24, 0x15	; 21
-  c8:	88 70       	andi	r24, 0x08	; 8
-  ca:	81 60       	ori	r24, 0x01	; 1
-  cc:	85 bb       	out	0x15, r24	; 21
-  ce:	8b b3       	in	r24, 0x1b	; 27
-  d0:	80 78       	andi	r24, 0x80	; 128
-  d2:	90 91 76 00 	lds	r25, 0x0076	; 0x800076 <screen>
-  d6:	89 2b       	or	r24, r25
-  d8:	8b bb       	out	0x1b, r24	; 27
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:248
+  d4:	85 b3       	in	r24, 0x15	; 21
+  d6:	88 70       	andi	r24, 0x08	; 8
+  d8:	81 60       	ori	r24, 0x01	; 1
+  da:	85 bb       	out	0x15, r24	; 21
+  dc:	8b b3       	in	r24, 0x1b	; 27
+  de:	80 78       	andi	r24, 0x80	; 128
+  e0:	90 91 75 00 	lds	r25, 0x0075	; 0x800075 <screen>
+  e4:	89 2b       	or	r24, r25
+  e6:	8b bb       	out	0x1b, r24	; 27
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:249
 				digit_num=1;
-  da:	81 e0       	ldi	r24, 0x01	; 1
-  dc:	0b c0       	rjmp	.+22     	; 0xf4 <prnt+0x52>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:251
+  e8:	81 e0       	ldi	r24, 0x01	; 1
+  ea:	0b c0       	rjmp	.+22     	; 0x102 <prnt+0x52>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:252
 				break;
 			case 1:
 				PORTC = ((PORTC&0x08)|0x02); PORTA=((PORTA&0x80)|screen[1]);
-  de:	85 b3       	in	r24, 0x15	; 21
-  e0:	88 70       	andi	r24, 0x08	; 8
-  e2:	82 60       	ori	r24, 0x02	; 2
-  e4:	85 bb       	out	0x15, r24	; 21
-  e6:	8b b3       	in	r24, 0x1b	; 27
-  e8:	80 78       	andi	r24, 0x80	; 128
-  ea:	90 91 77 00 	lds	r25, 0x0077	; 0x800077 <screen+0x1>
-  ee:	89 2b       	or	r24, r25
-  f0:	8b bb       	out	0x1b, r24	; 27
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:252
+  ec:	85 b3       	in	r24, 0x15	; 21
+  ee:	88 70       	andi	r24, 0x08	; 8
+  f0:	82 60       	ori	r24, 0x02	; 2
+  f2:	85 bb       	out	0x15, r24	; 21
+  f4:	8b b3       	in	r24, 0x1b	; 27
+  f6:	80 78       	andi	r24, 0x80	; 128
+  f8:	90 91 76 00 	lds	r25, 0x0076	; 0x800076 <screen+0x1>
+  fc:	89 2b       	or	r24, r25
+  fe:	8b bb       	out	0x1b, r24	; 27
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:253
 				digit_num=2;
-  f2:	82 e0       	ldi	r24, 0x02	; 2
-  f4:	80 93 ba 00 	sts	0x00BA, r24	; 0x8000ba <digit_num.2198>
-  f8:	08 95       	ret
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:259
+ 100:	82 e0       	ldi	r24, 0x02	; 2
+ 102:	80 93 b5 00 	sts	0x00B5, r24	; 0x8000b5 <digit_num.2192>
+ 106:	08 95       	ret
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:260
 			case 2:
 				PORTC = ((PORTC&0x08)|0x04); PORTA=((PORTA&0x80)|screen[2]);
 				digit_num=0;
 				break;
 			default:
 				digit_num=0;	
-  fa:	10 92 ba 00 	sts	0x00BA, r1	; 0x8000ba <digit_num.2198>
-  fe:	08 95       	ret
+ 108:	10 92 b5 00 	sts	0x00B5, r1	; 0x8000b5 <digit_num.2192>
+ 10c:	08 95       	ret
 
-00000100 <convert_temp>:
+0000010e <convert_temp>:
 convert_temp():
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:73
 	OCR2  = 125; 							// Установка значения таймера 1 тик = 1 мс.
@@ -192,112 +219,114 @@ convert_temp():
 }
 void convert_temp(uint16_t temp){
 	if(flags&OPEN_THERMOCOUPLE){
- 100:	20 91 b8 00 	lds	r18, 0x00B8	; 0x8000b8 <flags>
- 104:	30 91 b9 00 	lds	r19, 0x00B9	; 0x8000b9 <flags+0x1>
- 108:	31 ff       	sbrs	r19, 1
- 10a:	0a c0       	rjmp	.+20     	; 0x120 <convert_temp+0x20>
+ 10e:	20 91 b1 00 	lds	r18, 0x00B1	; 0x8000b1 <flags>
+ 112:	30 91 b2 00 	lds	r19, 0x00B2	; 0x8000b2 <flags+0x1>
+ 116:	31 ff       	sbrs	r19, 1
+ 118:	0a c0       	rjmp	.+20     	; 0x12e <convert_temp+0x20>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:74
 		memccpy(screen,OPN,0,3);
- 10c:	23 e0       	ldi	r18, 0x03	; 3
- 10e:	30 e0       	ldi	r19, 0x00	; 0
- 110:	40 e0       	ldi	r20, 0x00	; 0
- 112:	50 e0       	ldi	r21, 0x00	; 0
- 114:	69 e7       	ldi	r22, 0x79	; 121
- 116:	70 e0       	ldi	r23, 0x00	; 0
- 118:	86 e7       	ldi	r24, 0x76	; 118
- 11a:	90 e0       	ldi	r25, 0x00	; 0
- 11c:	0c 94 35 05 	jmp	0xa6a	; 0xa6a <memccpy>
+ 11a:	23 e0       	ldi	r18, 0x03	; 3
+ 11c:	30 e0       	ldi	r19, 0x00	; 0
+ 11e:	40 e0       	ldi	r20, 0x00	; 0
+ 120:	50 e0       	ldi	r21, 0x00	; 0
+ 122:	68 e7       	ldi	r22, 0x78	; 120
+ 124:	70 e0       	ldi	r23, 0x00	; 0
+ 126:	85 e7       	ldi	r24, 0x75	; 117
+ 128:	90 e0       	ldi	r25, 0x00	; 0
+ 12a:	0c 94 6d 04 	jmp	0x8da	; 0x8da <memccpy>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:76
 		}else{
-		temp %=1000;
- 120:	68 ee       	ldi	r22, 0xE8	; 232
- 122:	73 e0       	ldi	r23, 0x03	; 3
- 124:	0e 94 43 05 	call	0xa86	; 0xa86 <__udivmodhi4>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:77
-		screen[0] = digit[temp/100]; temp %= 100;
- 128:	64 e6       	ldi	r22, 0x64	; 100
- 12a:	70 e0       	ldi	r23, 0x00	; 0
- 12c:	0e 94 43 05 	call	0xa86	; 0xa86 <__udivmodhi4>
- 130:	fb 01       	movw	r30, r22
- 132:	e4 58       	subi	r30, 0x84	; 132
- 134:	ff 4f       	sbci	r31, 0xFF	; 255
- 136:	20 81       	ld	r18, Z
- 138:	20 93 76 00 	sts	0x0076, r18	; 0x800076 <screen>
+		temp>>=2;
+ 12e:	96 95       	lsr	r25
+ 130:	87 95       	ror	r24
+ 132:	96 95       	lsr	r25
+ 134:	87 95       	ror	r24
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:78
-		screen[1] = digit[temp/10]; temp %= 10;
- 13c:	6a e0       	ldi	r22, 0x0A	; 10
- 13e:	70 e0       	ldi	r23, 0x00	; 0
- 140:	0e 94 43 05 	call	0xa86	; 0xa86 <__udivmodhi4>
- 144:	fb 01       	movw	r30, r22
- 146:	e4 58       	subi	r30, 0x84	; 132
- 148:	ff 4f       	sbci	r31, 0xFF	; 255
- 14a:	20 81       	ld	r18, Z
- 14c:	20 93 77 00 	sts	0x0077, r18	; 0x800077 <screen+0x1>
+		//temp %=1000;
+		screen[0] = digit[temp/100]; temp %= 100;
+ 136:	64 e6       	ldi	r22, 0x64	; 100
+ 138:	70 e0       	ldi	r23, 0x00	; 0
+ 13a:	0e 94 7b 04 	call	0x8f6	; 0x8f6 <__udivmodhi4>
+ 13e:	fb 01       	movw	r30, r22
+ 140:	e5 58       	subi	r30, 0x85	; 133
+ 142:	ff 4f       	sbci	r31, 0xFF	; 255
+ 144:	20 81       	ld	r18, Z
+ 146:	20 93 75 00 	sts	0x0075, r18	; 0x800075 <screen>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:79
+		screen[1] = digit[temp/10]; temp %= 10;
+ 14a:	6a e0       	ldi	r22, 0x0A	; 10
+ 14c:	70 e0       	ldi	r23, 0x00	; 0
+ 14e:	0e 94 7b 04 	call	0x8f6	; 0x8f6 <__udivmodhi4>
+ 152:	fb 01       	movw	r30, r22
+ 154:	e5 58       	subi	r30, 0x85	; 133
+ 156:	ff 4f       	sbci	r31, 0xFF	; 255
+ 158:	20 81       	ld	r18, Z
+ 15a:	20 93 76 00 	sts	0x0076, r18	; 0x800076 <screen+0x1>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:80
 		screen[2] = digit[temp];
- 150:	fc 01       	movw	r30, r24
- 152:	e4 58       	subi	r30, 0x84	; 132
- 154:	ff 4f       	sbci	r31, 0xFF	; 255
- 156:	80 81       	ld	r24, Z
- 158:	80 93 78 00 	sts	0x0078, r24	; 0x800078 <screen+0x2>
- 15c:	08 95       	ret
+ 15e:	fc 01       	movw	r30, r24
+ 160:	e5 58       	subi	r30, 0x85	; 133
+ 162:	ff 4f       	sbci	r31, 0xFF	; 255
+ 164:	80 81       	ld	r24, Z
+ 166:	80 93 77 00 	sts	0x0077, r24	; 0x800077 <screen+0x2>
+ 16a:	08 95       	ret
 
-0000015e <__vector_3>:
+0000016c <__vector_3>:
 __vector_3():
- 15e:	1f 92       	push	r1
- 160:	0f 92       	push	r0
- 162:	0f b6       	in	r0, 0x3f	; 63
- 164:	0f 92       	push	r0
- 166:	11 24       	eor	r1, r1
- 168:	8f 93       	push	r24
- 16a:	9f 93       	push	r25
- 16c:	af 93       	push	r26
- 16e:	bf 93       	push	r27
- 170:	ef 93       	push	r30
- 172:	ff 93       	push	r31
- 174:	e0 e6       	ldi	r30, 0x60	; 96
- 176:	f0 e0       	ldi	r31, 0x00	; 0
- 178:	80 81       	ld	r24, Z
- 17a:	91 81       	ldd	r25, Z+1	; 0x01
- 17c:	a2 81       	ldd	r26, Z+2	; 0x02
- 17e:	b3 81       	ldd	r27, Z+3	; 0x03
- 180:	01 96       	adiw	r24, 0x01	; 1
- 182:	a1 1d       	adc	r26, r1
- 184:	b1 1d       	adc	r27, r1
- 186:	81 93       	st	Z+, r24
- 188:	91 93       	st	Z+, r25
- 18a:	a1 93       	st	Z+, r26
- 18c:	b1 93       	st	Z+, r27
- 18e:	80 e0       	ldi	r24, 0x00	; 0
- 190:	e4 37       	cpi	r30, 0x74	; 116
- 192:	f8 07       	cpc	r31, r24
- 194:	89 f7       	brne	.-30     	; 0x178 <__vector_3+0x1a>
- 196:	ff 91       	pop	r31
- 198:	ef 91       	pop	r30
- 19a:	bf 91       	pop	r27
- 19c:	af 91       	pop	r26
- 19e:	9f 91       	pop	r25
- 1a0:	8f 91       	pop	r24
- 1a2:	0f 90       	pop	r0
- 1a4:	0f be       	out	0x3f, r0	; 63
- 1a6:	0f 90       	pop	r0
- 1a8:	1f 90       	pop	r1
- 1aa:	18 95       	reti
+ 16c:	1f 92       	push	r1
+ 16e:	0f 92       	push	r0
+ 170:	0f b6       	in	r0, 0x3f	; 63
+ 172:	0f 92       	push	r0
+ 174:	11 24       	eor	r1, r1
+ 176:	8f 93       	push	r24
+ 178:	9f 93       	push	r25
+ 17a:	af 93       	push	r26
+ 17c:	bf 93       	push	r27
+ 17e:	ef 93       	push	r30
+ 180:	ff 93       	push	r31
+ 182:	e1 e6       	ldi	r30, 0x61	; 97
+ 184:	f0 e0       	ldi	r31, 0x00	; 0
+ 186:	80 81       	ld	r24, Z
+ 188:	91 81       	ldd	r25, Z+1	; 0x01
+ 18a:	a2 81       	ldd	r26, Z+2	; 0x02
+ 18c:	b3 81       	ldd	r27, Z+3	; 0x03
+ 18e:	01 96       	adiw	r24, 0x01	; 1
+ 190:	a1 1d       	adc	r26, r1
+ 192:	b1 1d       	adc	r27, r1
+ 194:	81 93       	st	Z+, r24
+ 196:	91 93       	st	Z+, r25
+ 198:	a1 93       	st	Z+, r26
+ 19a:	b1 93       	st	Z+, r27
+ 19c:	80 e0       	ldi	r24, 0x00	; 0
+ 19e:	e5 37       	cpi	r30, 0x75	; 117
+ 1a0:	f8 07       	cpc	r31, r24
+ 1a2:	89 f7       	brne	.-30     	; 0x186 <__vector_3+0x1a>
+ 1a4:	ff 91       	pop	r31
+ 1a6:	ef 91       	pop	r30
+ 1a8:	bf 91       	pop	r27
+ 1aa:	af 91       	pop	r26
+ 1ac:	9f 91       	pop	r25
+ 1ae:	8f 91       	pop	r24
+ 1b0:	0f 90       	pop	r0
+ 1b2:	0f be       	out	0x3f, r0	; 63
+ 1b4:	0f 90       	pop	r0
+ 1b6:	1f 90       	pop	r1
+ 1b8:	18 95       	reti
 
-000001ac <main>:
+000001ba <main>:
 main():
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:87
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:88
 ISR(TIMER2_COMP_vect)
 {
 	tick();
 }
 int main(void)
 {
- 1ac:	cf 93       	push	r28
- 1ae:	df 93       	push	r29
- 1b0:	1f 92       	push	r1
- 1b2:	cd b7       	in	r28, 0x3d	; 61
- 1b4:	de b7       	in	r29, 0x3e	; 62
+ 1ba:	cf 93       	push	r28
+ 1bc:	df 93       	push	r29
+ 1be:	1f 92       	push	r1
+ 1c0:	cd b7       	in	r28, 0x3d	; 61
+ 1c2:	de b7       	in	r29, 0x3e	; 62
 /usr/lib/avr/include/util/delay.h:187
 	#else
 		//round up by default
@@ -305,119 +334,117 @@ int main(void)
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
- 1b6:	87 e8       	ldi	r24, 0x87	; 135
- 1b8:	93 e1       	ldi	r25, 0x13	; 19
- 1ba:	01 97       	sbiw	r24, 0x01	; 1
- 1bc:	f1 f7       	brne	.-4      	; 0x1ba <main+0xe>
- 1be:	00 c0       	rjmp	.+0      	; 0x1c0 <main+0x14>
- 1c0:	00 00       	nop
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:90
+ 1c4:	87 e8       	ldi	r24, 0x87	; 135
+ 1c6:	93 e1       	ldi	r25, 0x13	; 19
+ 1c8:	01 97       	sbiw	r24, 0x01	; 1
+ 1ca:	f1 f7       	brne	.-4      	; 0x1c8 <main+0xe>
+ 1cc:	00 c0       	rjmp	.+0      	; 0x1ce <main+0x14>
+ 1ce:	00 00       	nop
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:91
 	_delay_ms(20);			//Задержка на 20 мс. Просто дать всему включиться.
 	//Настройка портов
 	DDRA = 0xff;			//Выход на сегменты
- 1c2:	8f ef       	ldi	r24, 0xFF	; 255
- 1c4:	8a bb       	out	0x1a, r24	; 26
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:91
-	DDRB = 0x00;			//Настройка кнопок на вход, SPI на выход
- 1c6:	17 ba       	out	0x17, r1	; 23
+ 1d0:	8f ef       	ldi	r24, 0xFF	; 255
+ 1d2:	8a bb       	out	0x1a, r24	; 26
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:92
-	DDRC = 0x0f;			//����� �� ������ � SSR
- 1c8:	9f e0       	ldi	r25, 0x0F	; 15
- 1ca:	94 bb       	out	0x14, r25	; 20
+	DDRB = 0x00;			//Настройка кнопок на вход
+ 1d4:	17 ba       	out	0x17, r1	; 23
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:93
-	DDRD = 0xff;			//��������� MAX6675
- 1cc:	81 bb       	out	0x11, r24	; 17
+	DDRC = 0x0f;			//����� �� ������ � SSR
+ 1d6:	9f e0       	ldi	r25, 0x0F	; 15
+ 1d8:	94 bb       	out	0x14, r25	; 20
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:94
-	PORTA = 0xff;			//�������� ��� ����������
- 1ce:	8b bb       	out	0x1b, r24	; 27
+	DDRD = 0xff;			//��������� MAX6675
+ 1da:	81 bb       	out	0x11, r24	; 17
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:95
+	PORTA = 0xff;			//�������� ��� ����������
+ 1dc:	8b bb       	out	0x1b, r24	; 27
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:96
 	PORTB = 0x5f;			//Подтягиваем все кнопки к +5В, также SS для MAX6675 К +5В.
- 1d0:	8f e5       	ldi	r24, 0x5F	; 95
- 1d2:	88 bb       	out	0x18, r24	; 24
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:97
+ 1de:	8f e5       	ldi	r24, 0x5F	; 95
+ 1e0:	88 bb       	out	0x18, r24	; 24
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:98
 	//Прогоняем тестовый экран. Для проверки динамической индикации.
 	PORTC = 1;_delay_ms(250);
- 1d4:	81 e0       	ldi	r24, 0x01	; 1
- 1d6:	85 bb       	out	0x15, r24	; 21
+ 1e2:	81 e0       	ldi	r24, 0x01	; 1
+ 1e4:	85 bb       	out	0x15, r24	; 21
 /usr/lib/avr/include/util/delay.h:187
- 1d8:	e3 e2       	ldi	r30, 0x23	; 35
- 1da:	f4 ef       	ldi	r31, 0xF4	; 244
- 1dc:	31 97       	sbiw	r30, 0x01	; 1
- 1de:	f1 f7       	brne	.-4      	; 0x1dc <main+0x30>
- 1e0:	00 c0       	rjmp	.+0      	; 0x1e2 <main+0x36>
- 1e2:	00 00       	nop
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:98
-	PORTC = 2;_delay_ms(250);
- 1e4:	92 e0       	ldi	r25, 0x02	; 2
- 1e6:	95 bb       	out	0x15, r25	; 21
-/usr/lib/avr/include/util/delay.h:187
- 1e8:	e3 e2       	ldi	r30, 0x23	; 35
- 1ea:	f4 ef       	ldi	r31, 0xF4	; 244
- 1ec:	31 97       	sbiw	r30, 0x01	; 1
- 1ee:	f1 f7       	brne	.-4      	; 0x1ec <main+0x40>
- 1f0:	00 c0       	rjmp	.+0      	; 0x1f2 <main+0x46>
- 1f2:	00 00       	nop
+ 1e6:	83 e2       	ldi	r24, 0x23	; 35
+ 1e8:	94 ef       	ldi	r25, 0xF4	; 244
+ 1ea:	01 97       	sbiw	r24, 0x01	; 1
+ 1ec:	f1 f7       	brne	.-4      	; 0x1ea <main+0x30>
+ 1ee:	00 c0       	rjmp	.+0      	; 0x1f0 <main+0x36>
+ 1f0:	00 00       	nop
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:99
-	PORTC = 4;_delay_ms(250);
- 1f4:	94 e0       	ldi	r25, 0x04	; 4
- 1f6:	95 bb       	out	0x15, r25	; 21
+	PORTC = 2;_delay_ms(250);
+ 1f2:	82 e0       	ldi	r24, 0x02	; 2
+ 1f4:	85 bb       	out	0x15, r24	; 21
 /usr/lib/avr/include/util/delay.h:187
- 1f8:	e3 e2       	ldi	r30, 0x23	; 35
- 1fa:	f4 ef       	ldi	r31, 0xF4	; 244
- 1fc:	31 97       	sbiw	r30, 0x01	; 1
- 1fe:	f1 f7       	brne	.-4      	; 0x1fc <main+0x50>
- 200:	00 c0       	rjmp	.+0      	; 0x202 <main+0x56>
- 202:	00 00       	nop
+ 1f6:	83 e2       	ldi	r24, 0x23	; 35
+ 1f8:	94 ef       	ldi	r25, 0xF4	; 244
+ 1fa:	01 97       	sbiw	r24, 0x01	; 1
+ 1fc:	f1 f7       	brne	.-4      	; 0x1fa <main+0x40>
+ 1fe:	00 c0       	rjmp	.+0      	; 0x200 <main+0x46>
+ 200:	00 00       	nop
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:100
-	PORTC = 8;_delay_ms(250);
- 204:	98 e0       	ldi	r25, 0x08	; 8
- 206:	95 bb       	out	0x15, r25	; 21
+	PORTC = 4;_delay_ms(250);
+ 202:	84 e0       	ldi	r24, 0x04	; 4
+ 204:	85 bb       	out	0x15, r24	; 21
 /usr/lib/avr/include/util/delay.h:187
- 208:	e3 e2       	ldi	r30, 0x23	; 35
- 20a:	f4 ef       	ldi	r31, 0xF4	; 244
- 20c:	31 97       	sbiw	r30, 0x01	; 1
- 20e:	f1 f7       	brne	.-4      	; 0x20c <main+0x60>
- 210:	00 c0       	rjmp	.+0      	; 0x212 <main+0x66>
- 212:	00 00       	nop
+ 206:	83 e2       	ldi	r24, 0x23	; 35
+ 208:	94 ef       	ldi	r25, 0xF4	; 244
+ 20a:	01 97       	sbiw	r24, 0x01	; 1
+ 20c:	f1 f7       	brne	.-4      	; 0x20a <main+0x50>
+ 20e:	00 c0       	rjmp	.+0      	; 0x210 <main+0x56>
+ 210:	00 00       	nop
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:101
-	PORTC = 0;_delay_ms(250);
- 214:	15 ba       	out	0x15, r1	; 21
+	PORTC = 8;_delay_ms(250);
+ 212:	88 e0       	ldi	r24, 0x08	; 8
+ 214:	85 bb       	out	0x15, r24	; 21
 /usr/lib/avr/include/util/delay.h:187
- 216:	e3 e2       	ldi	r30, 0x23	; 35
- 218:	f4 ef       	ldi	r31, 0xF4	; 244
- 21a:	31 97       	sbiw	r30, 0x01	; 1
- 21c:	f1 f7       	brne	.-4      	; 0x21a <main+0x6e>
- 21e:	00 c0       	rjmp	.+0      	; 0x220 <main+0x74>
+ 216:	83 e2       	ldi	r24, 0x23	; 35
+ 218:	94 ef       	ldi	r25, 0xF4	; 244
+ 21a:	01 97       	sbiw	r24, 0x01	; 1
+ 21c:	f1 f7       	brne	.-4      	; 0x21a <main+0x60>
+ 21e:	00 c0       	rjmp	.+0      	; 0x220 <main+0x66>
  220:	00 00       	nop
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:102
-	PORTC = 7;_delay_ms(1000);
- 222:	97 e0       	ldi	r25, 0x07	; 7
- 224:	95 bb       	out	0x15, r25	; 21
+	PORTC = 0;_delay_ms(250);
+ 222:	15 ba       	out	0x15, r1	; 21
 /usr/lib/avr/include/util/delay.h:187
- 226:	ff e3       	ldi	r31, 0x3F	; 63
- 228:	2d e0       	ldi	r18, 0x0D	; 13
- 22a:	33 e0       	ldi	r19, 0x03	; 3
- 22c:	f1 50       	subi	r31, 0x01	; 1
- 22e:	20 40       	sbci	r18, 0x00	; 0
- 230:	30 40       	sbci	r19, 0x00	; 0
- 232:	e1 f7       	brne	.-8      	; 0x22c <main+0x80>
- 234:	00 c0       	rjmp	.+0      	; 0x236 <main+0x8a>
- 236:	00 00       	nop
+ 224:	83 e2       	ldi	r24, 0x23	; 35
+ 226:	94 ef       	ldi	r25, 0xF4	; 244
+ 228:	01 97       	sbiw	r24, 0x01	; 1
+ 22a:	f1 f7       	brne	.-4      	; 0x228 <main+0x6e>
+ 22c:	00 c0       	rjmp	.+0      	; 0x22e <main+0x74>
+ 22e:	00 00       	nop
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:103
-	PORTC = 0;//_delay_ms(1000);
- 238:	15 ba       	out	0x15, r1	; 21
+	PORTC = 7;_delay_ms(1000);
+ 230:	87 e0       	ldi	r24, 0x07	; 7
+ 232:	85 bb       	out	0x15, r24	; 21
+/usr/lib/avr/include/util/delay.h:187
+ 234:	9f e3       	ldi	r25, 0x3F	; 63
+ 236:	2d e0       	ldi	r18, 0x0D	; 13
+ 238:	43 e0       	ldi	r20, 0x03	; 3
+ 23a:	91 50       	subi	r25, 0x01	; 1
+ 23c:	20 40       	sbci	r18, 0x00	; 0
+ 23e:	40 40       	sbci	r20, 0x00	; 0
+ 240:	e1 f7       	brne	.-8      	; 0x23a <main+0x80>
+ 242:	00 c0       	rjmp	.+0      	; 0x244 <main+0x8a>
+ 244:	00 00       	nop
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:104
-	PORTA = 0x7f;
- 23a:	9f e7       	ldi	r25, 0x7F	; 127
- 23c:	9b bb       	out	0x1b, r25	; 27
+	PORTC = 0;//_delay_ms(1000);
+ 246:	15 ba       	out	0x15, r1	; 21
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:105
-	PORTD = 0x01;			//Настройка пина SS.
- 23e:	82 bb       	out	0x12, r24	; 18
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:108
+	PORTA = 0x7f;
+ 248:	8f e7       	ldi	r24, 0x7F	; 127
+ 24a:	8b bb       	out	0x1b, r24	; 27
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:109
+	
 	
 	//Вычитываем данные настроек из EEPROM
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
- 240:	4f b7       	in	r20, 0x3f	; 63
+ 24c:	0f b7       	in	r16, 0x3f	; 63
 /usr/lib/avr/include/util/atomic.h:50
     return 1;
 }
@@ -425,76 +452,41 @@ int main(void)
 static __inline__ uint8_t __iCliRetVal(void)
 {
     cli();
- 242:	f8 94       	cli
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:366
-EECR |= (1<<EEWE);
-}
-unsigned char EEPROM_read(unsigned int uiAddress)
-{
-/* Wait for completion of previous write */
-while(EECR & (1<<EEWE))
- 244:	e1 99       	sbic	0x1c, 1	; 28
- 246:	fe cf       	rjmp	.-4      	; 0x244 <main+0x98>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:369
-;
-/* Set up address register */
-EEAR = uiAddress;
- 248:	1f ba       	out	0x1f, r1	; 31
- 24a:	1e ba       	out	0x1e, r1	; 30
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:371
-/* Start eeprom read by writing EERE */
-EECR |= (1<<EERE);
- 24c:	e0 9a       	sbi	0x1c, 0	; 28
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:373
-/* Return data from data register */
-return EEDR;
- 24e:	8d b3       	in	r24, 0x1d	; 29
+ 24e:	f8 94       	cli
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:110
-	PORTD = 0x01;			//Настройка пина SS.
-	
-	//Вычитываем данные настроек из EEPROM
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
 		sel_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Температура по-умолчанию старший байт
+ 250:	80 e0       	ldi	r24, 0x00	; 0
+ 252:	90 e0       	ldi	r25, 0x00	; 0
+ 254:	0e 94 49 00 	call	0x92	; 0x92 <EEPROM_read>
+ 258:	18 2f       	mov	r17, r24
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:112
 		sel_temp <<=8;
- 250:	10 92 74 00 	sts	0x0074, r1	; 0x800074 <sel_temp>
- 254:	80 93 75 00 	sts	0x0075, r24	; 0x800075 <sel_temp+0x1>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:366
-EECR |= (1<<EEWE);
-}
-unsigned char EEPROM_read(unsigned int uiAddress)
-{
-/* Wait for completion of previous write */
-while(EECR & (1<<EEWE))
- 258:	e1 99       	sbic	0x1c, 1	; 28
- 25a:	fe cf       	rjmp	.-4      	; 0x258 <main+0xac>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:369
-;
-/* Set up address register */
-EEAR = uiAddress;
- 25c:	81 e0       	ldi	r24, 0x01	; 1
- 25e:	90 e0       	ldi	r25, 0x00	; 0
- 260:	9f bb       	out	0x1f, r25	; 31
- 262:	8e bb       	out	0x1e, r24	; 30
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:371
-/* Start eeprom read by writing EERE */
-EECR |= (1<<EERE);
- 264:	e0 9a       	sbi	0x1c, 0	; 28
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:373
-/* Return data from data register */
-return EEDR;
- 266:	5d b3       	in	r21, 0x1d	; 29
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:111
+		sel_temp |=EEPROM_read(DEFAULT_TEMP_LBYTE);		//Температура по-умолчанию младший байт
+ 25a:	81 e0       	ldi	r24, 0x01	; 1
+ 25c:	90 e0       	ldi	r25, 0x00	; 0
+ 25e:	0e 94 49 00 	call	0x92	; 0x92 <EEPROM_read>
+ 262:	21 2f       	mov	r18, r17
+ 264:	30 e0       	ldi	r19, 0x00	; 0
+ 266:	32 2f       	mov	r19, r18
+ 268:	22 27       	eor	r18, r18
+ 26a:	a9 01       	movw	r20, r18
+ 26c:	48 2b       	or	r20, r24
+ 26e:	ca 01       	movw	r24, r20
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:113
+		if(sel_temp>MAX_TEMP)sel_temp=MAX_TEMP/2;		//Защита от чистого EEPROM. С новья будет на середине диапазона.
+ 270:	8d 39       	cpi	r24, 0x9D	; 157
+ 272:	5f e0       	ldi	r21, 0x0F	; 15
+ 274:	95 07       	cpc	r25, r21
+ 276:	e0 f4       	brcc	.+56     	; 0x2b0 <main+0xf6>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:112
 	
 	//Вычитываем данные настроек из EEPROM
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
 		sel_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Температура по-умолчанию старший байт
 		sel_temp <<=8;
 		sel_temp |=EEPROM_read(DEFAULT_TEMP_LBYTE);		//Температура по-умолчанию младший байт
- 268:	20 91 74 00 	lds	r18, 0x0074	; 0x800074 <sel_temp>
- 26c:	30 91 75 00 	lds	r19, 0x0075	; 0x800075 <sel_temp+0x1>
- 270:	25 2b       	or	r18, r21
- 272:	30 93 75 00 	sts	0x0075, r19	; 0x800075 <sel_temp+0x1>
- 276:	20 93 74 00 	sts	0x0074, r18	; 0x800074 <sel_temp>
+ 278:	90 93 b4 00 	sts	0x00B4, r25	; 0x8000b4 <sel_temp+0x1>
+ 27c:	80 93 b3 00 	sts	0x00B3, r24	; 0x8000b3 <sel_temp>
 /usr/lib/avr/include/util/atomic.h:70
     (void)__s;
 }
@@ -502,53 +494,77 @@ return EEDR;
 static __inline__ void __iRestore(const  uint8_t *__s)
 {
     SREG = *__s;
- 27a:	4f bf       	out	0x3f, r20	; 63
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:331
-		curr_temp=(filtered_data>>2);
+ 280:	0f bf       	out	0x3f, r16	; 63
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:419
+		curr_temp=filtered_data;
 	}
 	PORTD |= 1<<0;	
 }
 void SPI_init(void){
-    DDR_SPI = (1<<DD_MOSI)|(1<<DD_SCK);
- 27c:	20 ea       	ldi	r18, 0xA0	; 160
- 27e:	27 bb       	out	0x17, r18	; 23
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:332
-    SPCR = (1<<SPE)|(1<<MSTR)|(0<<SPR0);
- 280:	20 e5       	ldi	r18, 0x50	; 80
- 282:	2d b9       	out	0x0d, r18	; 13
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:117
+    DDR_SPI = (1<<DD_MOSI)|(1<<DD_SCK);	//Настройка портов MOSI и SCK
+ 282:	80 ea       	ldi	r24, 0xA0	; 160
+ 284:	87 bb       	out	0x17, r24	; 23
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:420
+	PORTD = (1<<0);						//Настройка пина SS. ХЗ зачем я его сделал отдельно от основного SPI.
+ 286:	81 e0       	ldi	r24, 0x01	; 1
+ 288:	82 bb       	out	0x12, r24	; 18
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:421
+    SPCR = (1<<SPE)|(1<<MSTR)|(0<<SPR0);//Настройка регистра. Включить SPI, мастер, на частоте F_CPU/2
+ 28a:	80 e5       	ldi	r24, 0x50	; 80
+ 28c:	8d b9       	out	0x0d, r24	; 13
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:119
 	}
 	
 	SPI_init();		//Инициализация аппаратного SPI
 
 	//Если зажать левую кнопку (Назад) - то будет загрузка в инженерное меню.
 	if((PINB&BTN_MASK)==BTN4){
- 284:	26 b3       	in	r18, 0x16	; 22
- 286:	2f 70       	andi	r18, 0x0F	; 15
- 288:	2e 30       	cpi	r18, 0x0E	; 14
- 28a:	79 f4       	brne	.+30     	; 0x2aa <main+0xfe>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:118
-		flags=ENGENEER_MODE;
- 28c:	24 e0       	ldi	r18, 0x04	; 4
- 28e:	30 e0       	ldi	r19, 0x00	; 0
- 290:	30 93 b9 00 	sts	0x00B9, r19	; 0x8000b9 <flags+0x1>
- 294:	20 93 b8 00 	sts	0x00B8, r18	; 0x8000b8 <flags>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:119
-		menuNum = 1;
- 298:	90 93 b7 00 	sts	0x00B7, r25	; 0x8000b7 <menuNum+0x1>
- 29c:	80 93 b6 00 	sts	0x00B6, r24	; 0x8000b6 <menuNum>
+ 28e:	86 b3       	in	r24, 0x16	; 22
+ 290:	8f 70       	andi	r24, 0x0F	; 15
+ 292:	8e 30       	cpi	r24, 0x0E	; 14
+ 294:	a9 f4       	brne	.+42     	; 0x2c0 <main+0x106>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:120
-		while((PINB&BTN_MASK)==BTN4){}			//Ждем пока кнопку отпустят.
- 2a0:	86 b3       	in	r24, 0x16	; 22
- 2a2:	8f 70       	andi	r24, 0x0F	; 15
- 2a4:	8e 30       	cpi	r24, 0x0E	; 14
- 2a6:	e1 f3       	breq	.-8      	; 0x2a0 <main+0xf4>
- 2a8:	04 c0       	rjmp	.+8      	; 0x2b2 <main+0x106>
+		flags=ENGENEER_MODE;
+ 296:	84 e0       	ldi	r24, 0x04	; 4
+ 298:	90 e0       	ldi	r25, 0x00	; 0
+ 29a:	90 93 b2 00 	sts	0x00B2, r25	; 0x8000b2 <flags+0x1>
+ 29e:	80 93 b1 00 	sts	0x00B1, r24	; 0x8000b1 <flags>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:121
+		menuNum = 1;
+ 2a2:	81 e0       	ldi	r24, 0x01	; 1
+ 2a4:	90 e0       	ldi	r25, 0x00	; 0
+ 2a6:	90 93 b0 00 	sts	0x00B0, r25	; 0x8000b0 <menuNum+0x1>
+ 2aa:	80 93 af 00 	sts	0x00AF, r24	; 0x8000af <menuNum>
+ 2ae:	03 c0       	rjmp	.+6      	; 0x2b6 <main+0xfc>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:113
+	//Вычитываем данные настроек из EEPROM
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+		sel_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Температура по-умолчанию старший байт
+		sel_temp <<=8;
+		sel_temp |=EEPROM_read(DEFAULT_TEMP_LBYTE);		//Температура по-умолчанию младший байт
+		if(sel_temp>MAX_TEMP)sel_temp=MAX_TEMP/2;		//Защита от чистого EEPROM. С новья будет на середине диапазона.
+ 2b0:	8e ec       	ldi	r24, 0xCE	; 206
+ 2b2:	97 e0       	ldi	r25, 0x07	; 7
+ 2b4:	e1 cf       	rjmp	.-62     	; 0x278 <main+0xbe>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:122
+
+	//Если зажать левую кнопку (Назад) - то будет загрузка в инженерное меню.
+	if((PINB&BTN_MASK)==BTN4){
+		flags=ENGENEER_MODE;
+		menuNum = 1;
+		while((PINB&BTN_MASK)==BTN4){}			//Ждем пока кнопку отпустят.
+ 2b6:	86 b3       	in	r24, 0x16	; 22
+ 2b8:	8f 70       	andi	r24, 0x0F	; 15
+ 2ba:	8e 30       	cpi	r24, 0x0E	; 14
+ 2bc:	e1 f3       	breq	.-8      	; 0x2b6 <main+0xfc>
+ 2be:	06 c0       	rjmp	.+12     	; 0x2cc <main+0x112>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:124
 	}else{
 		flags=NORMAL_MODE;
- 2aa:	90 93 b9 00 	sts	0x00B9, r25	; 0x8000b9 <flags+0x1>
- 2ae:	80 93 b8 00 	sts	0x00B8, r24	; 0x8000b8 <flags>
+ 2c0:	81 e0       	ldi	r24, 0x01	; 1
+ 2c2:	90 e0       	ldi	r25, 0x00	; 0
+ 2c4:	90 93 b2 00 	sts	0x00B2, r25	; 0x8000b2 <flags+0x1>
+ 2c8:	80 93 b1 00 	sts	0x00B1, r24	; 0x8000b1 <flags>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:66
 int16_t max6675_read(void); //Читаем температуру.
 void EEPROM_write(unsigned int uiAddress, unsigned char ucData); //Запись в EEPROM
@@ -556,432 +572,773 @@ unsigned char EEPROM_read(unsigned int uiAddress);				 //Чтение из EEPRO
 inline void RunTimer (void)
 {
 	TCCR2 = 1<<WGM21|2<<CS20; 				// Настройка счетчика с предделителем=8
- 2b2:	8a e0       	ldi	r24, 0x0A	; 10
- 2b4:	85 bd       	out	0x25, r24	; 37
+ 2cc:	8a e0       	ldi	r24, 0x0A	; 10
+ 2ce:	85 bd       	out	0x25, r24	; 37
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:67
 	TCNT2 = 0;								// Обнуляем регистры
- 2b6:	14 bc       	out	0x24, r1	; 36
+ 2d0:	14 bc       	out	0x24, r1	; 36
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:68
 	OCR2  = 125; 							// Установка значения таймера 1 тик = 1 мс.
- 2b8:	8d e7       	ldi	r24, 0x7D	; 125
- 2ba:	83 bd       	out	0x23, r24	; 35
+ 2d2:	8d e7       	ldi	r24, 0x7D	; 125
+ 2d4:	83 bd       	out	0x23, r24	; 35
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:69
 	TIMSK |= 1<<OCIE2;						// Включаем прерывание.
- 2bc:	89 b7       	in	r24, 0x39	; 57
- 2be:	80 68       	ori	r24, 0x80	; 128
- 2c0:	89 bf       	out	0x39, r24	; 57
+ 2d6:	89 b7       	in	r24, 0x39	; 57
+ 2d8:	80 68       	ori	r24, 0x80	; 128
+ 2da:	89 bf       	out	0x39, r24	; 57
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:70
 	sei();									// Включаем прерывания глобально
- 2c2:	78 94       	sei
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:156
-				case 51:convert_temp(500);break;
-				case 300:memccpy(screen,PID_P,0,3);break;
-				case 301:memccpy(screen,PID_I,0,3);break;
-				case 302:memccpy(screen,PID_D,0,3);break;
+ 2dc:	78 94       	sei
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:158
+				case 41:convert_temp(500);break;
+				case 200:memccpy(screen,PID_P,0,3);break;
+				case 201:memccpy(screen,PID_I,0,3);break;
+				case 202:memccpy(screen,PID_D,0,3);break;
 				default:
 					if(lastAct==1)menuNum/=10;
- 2c4:	0a e0       	ldi	r16, 0x0A	; 10
- 2c6:	10 e0       	ldi	r17, 0x00	; 0
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:384
-		if(timerManager[1]>100){convert_temp(sel_temp);PORTA ^= (1<<7);timerManager[1]=0;}
-		if(timerManager[2]>=BUTTONS_READ_DELAY){
-			static uint8_t btnStatus;
-			static uint8_t longPress;
-			if ((~PINB)&BTN_MASK && longPress<1){
-				longPress++;
- 2c8:	ff 24       	eor	r15, r15
- 2ca:	f3 94       	inc	r15
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:398
-							EEPROM_write(DEFAULT_TEMP_HBYTE, (unsigned char)(sel_temp>>8));
-							EEPROM_write(DEFAULT_TEMP_LBYTE,(unsigned char)sel_temp);
-						}
-						return;break;
-					case BTN2:sel_temp++;
-						if (sel_temp>=1000)sel_temp=(999);	//Если достигли максимума.
- 2cc:	87 ee       	ldi	r24, 0xE7	; 231
- 2ce:	c8 2e       	mov	r12, r24
- 2d0:	83 e0       	ldi	r24, 0x03	; 3
- 2d2:	d8 2e       	mov	r13, r24
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:384
-		if(timerManager[1]>100){convert_temp(sel_temp);PORTA ^= (1<<7);timerManager[1]=0;}
-		if(timerManager[2]>=BUTTONS_READ_DELAY){
-			static uint8_t btnStatus;
-			static uint8_t longPress;
-			if ((~PINB)&BTN_MASK && longPress<1){
-				longPress++;
- 2d4:	ee 24       	eor	r14, r14
- 2d6:	e3 94       	inc	r14
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:171
+ 2de:	0a e0       	ldi	r16, 0x0A	; 10
+ 2e0:	10 e0       	ldi	r17, 0x00	; 0
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:173
 			static uint8_t btnStatus;
 			if (btnStatus!=(PINB&BTN_MASK)) {
 				btnStatus = (PINB&BTN_MASK);
 				switch (btnStatus){
 					case BTN1:menuNum*=10;lastAct=1;break;
 					case BTN2:menuNum++;lastAct=2; break;
- 2d8:	92 e0       	ldi	r25, 0x02	; 2
- 2da:	b9 2e       	mov	r11, r25
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:172
+ 2e2:	f2 e0       	ldi	r31, 0x02	; 2
+ 2e4:	df 2e       	mov	r13, r31
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:174
 					case BTN3:menuNum--;lastAct=3; break;
- 2dc:	23 e0       	ldi	r18, 0x03	; 3
- 2de:	a2 2e       	mov	r10, r18
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:173
+ 2e6:	a3 e0       	ldi	r26, 0x03	; 3
+ 2e8:	ca 2e       	mov	r12, r26
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:175
 					case BTN4:menuNum/=10;lastAct=4; break;
- 2e0:	34 e0       	ldi	r19, 0x04	; 4
- 2e2:	93 2e       	mov	r9, r19
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:170
+ 2ea:	b4 e0       	ldi	r27, 0x04	; 4
+ 2ec:	bb 2e       	mov	r11, r27
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:172
 		if(timerManager[2]>=BUTTONS_READ_DELAY){
 			static uint8_t btnStatus;
 			if (btnStatus!=(PINB&BTN_MASK)) {
 				btnStatus = (PINB&BTN_MASK);
 				switch (btnStatus){
 					case BTN1:menuNum*=10;lastAct=1;break;
- 2e4:	4a e0       	ldi	r20, 0x0A	; 10
- 2e6:	84 2e       	mov	r8, r20
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:129
+ 2ee:	8a e0       	ldi	r24, 0x0A	; 10
+ 2f0:	a8 2e       	mov	r10, r24
+ 2f2:	99 24       	eor	r9, r9
+ 2f4:	93 94       	inc	r9
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:180
+					case BTN4:menuNum/=10;lastAct=4; break;
+				}
+				while ((PINB&BTN_MASK)!=BTN_MASK){PORTA=0x00;}	//Пока кнопку не отпустят - стопорим дальнейшее выполнение.
+			}
+			if (menuNum<=0 && lastAct==4){ //Продолжаем загрузку в нормальном режиме.
+				flags=NORMAL_MODE;
+ 2f6:	ee 24       	eor	r14, r14
+ 2f8:	e3 94       	inc	r14
+ 2fa:	f1 2c       	mov	r15, r1
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:131
 	RunTimer();					//Запускаем таймер.
 
 //------------------------------------------------------------------	
 //Процедуры инженерного меню.
 //------------------------------------------------------------------
 	while (flags==ENGENEER_MODE){
- 2e8:	80 91 b8 00 	lds	r24, 0x00B8	; 0x8000b8 <flags>
- 2ec:	90 91 b9 00 	lds	r25, 0x00B9	; 0x8000b9 <flags+0x1>
- 2f0:	04 97       	sbiw	r24, 0x04	; 4
- 2f2:	09 f0       	breq	.+2      	; 0x2f6 <main+0x14a>
- 2f4:	1c c2       	rjmp	.+1080   	; 0x72e <__stack+0x2cf>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:131
+ 2fc:	80 91 b1 00 	lds	r24, 0x00B1	; 0x8000b1 <flags>
+ 300:	90 91 b2 00 	lds	r25, 0x00B2	; 0x8000b2 <flags+0x1>
+ 304:	04 97       	sbiw	r24, 0x04	; 4
+ 306:	09 f0       	breq	.+2      	; 0x30a <main+0x150>
+ 308:	5c c1       	rjmp	.+696    	; 0x5c2 <__stack+0x163>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:133
 		//------------------------------------------------------------------
 		if (timerManager[0]>=SCREEN_UPDATE_DELAY){
- 2f6:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
- 2fa:	90 91 61 00 	lds	r25, 0x0061	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
- 2fe:	a0 91 62 00 	lds	r26, 0x0062	; 0x800062 <__DATA_REGION_ORIGIN__+0x2>
- 302:	b0 91 63 00 	lds	r27, 0x0063	; 0x800063 <__DATA_REGION_ORIGIN__+0x3>
- 306:	05 97       	sbiw	r24, 0x05	; 5
- 308:	a1 05       	cpc	r26, r1
- 30a:	b1 05       	cpc	r27, r1
- 30c:	50 f0       	brcs	.+20     	; 0x322 <main+0x176>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:132
+ 30a:	80 91 61 00 	lds	r24, 0x0061	; 0x800061 <timerManager>
+ 30e:	90 91 62 00 	lds	r25, 0x0062	; 0x800062 <timerManager+0x1>
+ 312:	a0 91 63 00 	lds	r26, 0x0063	; 0x800063 <timerManager+0x2>
+ 316:	b0 91 64 00 	lds	r27, 0x0064	; 0x800064 <timerManager+0x3>
+ 31a:	05 97       	sbiw	r24, 0x05	; 5
+ 31c:	a1 05       	cpc	r26, r1
+ 31e:	b1 05       	cpc	r27, r1
+ 320:	50 f0       	brcs	.+20     	; 0x336 <main+0x17c>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:134
 			prnt();
- 30e:	0e 94 51 00 	call	0xa2	; 0xa2 <prnt>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:133
-			timerManager[0]=0;
- 312:	10 92 60 00 	sts	0x0060, r1	; 0x800060 <__DATA_REGION_ORIGIN__>
- 316:	10 92 61 00 	sts	0x0061, r1	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
- 31a:	10 92 62 00 	sts	0x0062, r1	; 0x800062 <__DATA_REGION_ORIGIN__+0x2>
- 31e:	10 92 63 00 	sts	0x0063, r1	; 0x800063 <__DATA_REGION_ORIGIN__+0x3>
+ 322:	0e 94 58 00 	call	0xb0	; 0xb0 <prnt>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:135
-		}
-		if (timerManager[1]>100){
- 322:	80 91 64 00 	lds	r24, 0x0064	; 0x800064 <__DATA_REGION_ORIGIN__+0x4>
- 326:	90 91 65 00 	lds	r25, 0x0065	; 0x800065 <__DATA_REGION_ORIGIN__+0x5>
- 32a:	a0 91 66 00 	lds	r26, 0x0066	; 0x800066 <__DATA_REGION_ORIGIN__+0x6>
- 32e:	b0 91 67 00 	lds	r27, 0x0067	; 0x800067 <__DATA_REGION_ORIGIN__+0x7>
- 332:	85 36       	cpi	r24, 0x65	; 101
- 334:	91 05       	cpc	r25, r1
- 336:	a1 05       	cpc	r26, r1
- 338:	b1 05       	cpc	r27, r1
- 33a:	08 f4       	brcc	.+2      	; 0x33e <main+0x192>
- 33c:	80 c1       	rjmp	.+768    	; 0x63e <__stack+0x1df>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:136
-			switch (menuNum){
- 33e:	80 91 b6 00 	lds	r24, 0x00B6	; 0x8000b6 <menuNum>
- 342:	90 91 b7 00 	lds	r25, 0x00B7	; 0x8000b7 <menuNum+0x1>
- 346:	86 31       	cpi	r24, 0x16	; 22
- 348:	91 05       	cpc	r25, r1
- 34a:	09 f4       	brne	.+2      	; 0x34e <main+0x1a2>
- 34c:	2a c1       	rjmp	.+596    	; 0x5a2 <__stack+0x143>
- 34e:	48 f5       	brcc	.+82     	; 0x3a2 <main+0x1f6>
- 350:	84 30       	cpi	r24, 0x04	; 4
- 352:	91 05       	cpc	r25, r1
- 354:	09 f4       	brne	.+2      	; 0x358 <main+0x1ac>
- 356:	1e c1       	rjmp	.+572    	; 0x594 <__stack+0x135>
- 358:	88 f4       	brcc	.+34     	; 0x37c <main+0x1d0>
- 35a:	82 30       	cpi	r24, 0x02	; 2
- 35c:	91 05       	cpc	r25, r1
- 35e:	09 f4       	brne	.+2      	; 0x362 <main+0x1b6>
- 360:	62 c0       	rjmp	.+196    	; 0x426 <__LOCK_REGION_LENGTH__+0x26>
- 362:	08 f0       	brcs	.+2      	; 0x366 <main+0x1ba>
- 364:	10 c1       	rjmp	.+544    	; 0x586 <__stack+0x127>
- 366:	81 30       	cpi	r24, 0x01	; 1
- 368:	91 05       	cpc	r25, r1
- 36a:	09 f0       	breq	.+2      	; 0x36e <main+0x1c2>
- 36c:	46 c1       	rjmp	.+652    	; 0x5fa <__stack+0x19b>
+			timerManager[0]=0;
+ 326:	10 92 61 00 	sts	0x0061, r1	; 0x800061 <timerManager>
+ 32a:	10 92 62 00 	sts	0x0062, r1	; 0x800062 <timerManager+0x1>
+ 32e:	10 92 63 00 	sts	0x0063, r1	; 0x800063 <timerManager+0x2>
+ 332:	10 92 64 00 	sts	0x0064, r1	; 0x800064 <timerManager+0x3>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:137
-				case 1:memccpy(screen,DEF,0,3);break;
- 36e:	23 e0       	ldi	r18, 0x03	; 3
- 370:	30 e0       	ldi	r19, 0x00	; 0
- 372:	40 e0       	ldi	r20, 0x00	; 0
- 374:	50 e0       	ldi	r21, 0x00	; 0
- 376:	67 ea       	ldi	r22, 0xA7	; 167
- 378:	70 e0       	ldi	r23, 0x00	; 0
- 37a:	3a c1       	rjmp	.+628    	; 0x5f0 <__stack+0x191>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:136
-		if (timerManager[0]>=SCREEN_UPDATE_DELAY){
-			prnt();
-			timerManager[0]=0;
 		}
 		if (timerManager[1]>100){
-			switch (menuNum){
- 37c:	8a 30       	cpi	r24, 0x0A	; 10
- 37e:	91 05       	cpc	r25, r1
- 380:	09 f4       	brne	.+2      	; 0x384 <main+0x1d8>
- 382:	82 c0       	rjmp	.+260    	; 0x488 <__stack+0x29>
- 384:	28 f4       	brcc	.+10     	; 0x390 <main+0x1e4>
- 386:	85 30       	cpi	r24, 0x05	; 5
- 388:	91 05       	cpc	r25, r1
- 38a:	09 f4       	brne	.+2      	; 0x38e <main+0x1e2>
- 38c:	11 c1       	rjmp	.+546    	; 0x5b0 <__stack+0x151>
- 38e:	35 c1       	rjmp	.+618    	; 0x5fa <__stack+0x19b>
- 390:	84 31       	cpi	r24, 0x14	; 20
- 392:	91 05       	cpc	r25, r1
- 394:	09 f4       	brne	.+2      	; 0x398 <main+0x1ec>
- 396:	f7 c0       	rjmp	.+494    	; 0x586 <__stack+0x127>
- 398:	85 31       	cpi	r24, 0x15	; 21
- 39a:	91 05       	cpc	r25, r1
- 39c:	09 f4       	brne	.+2      	; 0x3a0 <main+0x1f4>
- 39e:	fa c0       	rjmp	.+500    	; 0x594 <__stack+0x135>
- 3a0:	2c c1       	rjmp	.+600    	; 0x5fa <__stack+0x19b>
- 3a2:	82 33       	cpi	r24, 0x32	; 50
- 3a4:	91 05       	cpc	r25, r1
- 3a6:	09 f4       	brne	.+2      	; 0x3aa <main+0x1fe>
- 3a8:	11 c1       	rjmp	.+546    	; 0x5cc <__stack+0x16d>
- 3aa:	f8 f4       	brcc	.+62     	; 0x3ea <main+0x23e>
- 3ac:	8f 31       	cpi	r24, 0x1F	; 31
- 3ae:	91 05       	cpc	r25, r1
- 3b0:	09 f4       	brne	.+2      	; 0x3b4 <main+0x208>
- 3b2:	fe c0       	rjmp	.+508    	; 0x5b0 <__stack+0x151>
- 3b4:	58 f4       	brcc	.+22     	; 0x3cc <main+0x220>
- 3b6:	8e 31       	cpi	r24, 0x1E	; 30
- 3b8:	91 05       	cpc	r25, r1
- 3ba:	09 f0       	breq	.+2      	; 0x3be <main+0x212>
- 3bc:	1e c1       	rjmp	.+572    	; 0x5fa <__stack+0x19b>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:146
-				case 5:memccpy(screen,CAL,0,3);break;
-				case 10:set_default_temp();break;//Выбор температуры по-умолчанию
-				case 20:memccpy(screen,PID,0,3);break;
-				case 21:memccpy(screen,HYS,0,3);break;
-				case 22:memccpy(screen,REL,0,3);break;
-				case 30:memccpy(screen,SET,0,3);break;
- 3be:	23 e0       	ldi	r18, 0x03	; 3
- 3c0:	30 e0       	ldi	r19, 0x00	; 0
- 3c2:	40 e0       	ldi	r20, 0x00	; 0
- 3c4:	50 e0       	ldi	r21, 0x00	; 0
- 3c6:	65 e9       	ldi	r22, 0x95	; 149
- 3c8:	70 e0       	ldi	r23, 0x00	; 0
- 3ca:	12 c1       	rjmp	.+548    	; 0x5f0 <__stack+0x191>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:136
-		if (timerManager[0]>=SCREEN_UPDATE_DELAY){
-			prnt();
-			timerManager[0]=0;
-		}
-		if (timerManager[1]>100){
-			switch (menuNum){
- 3cc:	88 32       	cpi	r24, 0x28	; 40
- 3ce:	91 05       	cpc	r25, r1
- 3d0:	09 f4       	brne	.+2      	; 0x3d4 <main+0x228>
- 3d2:	f5 c0       	rjmp	.+490    	; 0x5be <__stack+0x15f>
- 3d4:	89 32       	cpi	r24, 0x29	; 41
- 3d6:	91 05       	cpc	r25, r1
- 3d8:	09 f0       	breq	.+2      	; 0x3dc <main+0x230>
- 3da:	0f c1       	rjmp	.+542    	; 0x5fa <__stack+0x19b>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:149
-				case 21:memccpy(screen,HYS,0,3);break;
-				case 22:memccpy(screen,REL,0,3);break;
-				case 30:memccpy(screen,SET,0,3);break;
-				case 31:memccpy(screen,CAL,0,3);break;
-				case 40:memccpy(screen,MAX,0,3);break;
-				case 41:memccpy(screen,MIN,0,3);break;
- 3dc:	23 e0       	ldi	r18, 0x03	; 3
- 3de:	30 e0       	ldi	r19, 0x00	; 0
- 3e0:	40 e0       	ldi	r20, 0x00	; 0
- 3e2:	50 e0       	ldi	r21, 0x00	; 0
- 3e4:	6f e8       	ldi	r22, 0x8F	; 143
- 3e6:	70 e0       	ldi	r23, 0x00	; 0
- 3e8:	03 c1       	rjmp	.+518    	; 0x5f0 <__stack+0x191>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:136
-		if (timerManager[0]>=SCREEN_UPDATE_DELAY){
-			prnt();
-			timerManager[0]=0;
-		}
-		if (timerManager[1]>100){
-			switch (menuNum){
- 3ea:	8c 32       	cpi	r24, 0x2C	; 44
- 3ec:	e1 e0       	ldi	r30, 0x01	; 1
- 3ee:	9e 07       	cpc	r25, r30
- 3f0:	09 f4       	brne	.+2      	; 0x3f4 <main+0x248>
- 3f2:	f1 c0       	rjmp	.+482    	; 0x5d6 <__stack+0x177>
- 3f4:	38 f4       	brcc	.+14     	; 0x404 <__LOCK_REGION_LENGTH__+0x4>
- 3f6:	83 33       	cpi	r24, 0x33	; 51
- 3f8:	91 05       	cpc	r25, r1
- 3fa:	09 f0       	breq	.+2      	; 0x3fe <main+0x252>
- 3fc:	fe c0       	rjmp	.+508    	; 0x5fa <__stack+0x19b>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:151
-				case 30:memccpy(screen,SET,0,3);break;
-				case 31:memccpy(screen,CAL,0,3);break;
-				case 40:memccpy(screen,MAX,0,3);break;
-				case 41:memccpy(screen,MIN,0,3);break;
-				case 50:convert_temp(0);break;
-				case 51:convert_temp(500);break;
- 3fe:	84 ef       	ldi	r24, 0xF4	; 244
- 400:	91 e0       	ldi	r25, 0x01	; 1
- 402:	e6 c0       	rjmp	.+460    	; 0x5d0 <__stack+0x171>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:136
-		if (timerManager[0]>=SCREEN_UPDATE_DELAY){
-			prnt();
-			timerManager[0]=0;
-		}
-		if (timerManager[1]>100){
-			switch (menuNum){
- 404:	8d 32       	cpi	r24, 0x2D	; 45
- 406:	21 e0       	ldi	r18, 0x01	; 1
- 408:	92 07       	cpc	r25, r18
- 40a:	09 f4       	brne	.+2      	; 0x40e <__LOCK_REGION_LENGTH__+0xe>
- 40c:	eb c0       	rjmp	.+470    	; 0x5e4 <__stack+0x185>
- 40e:	8e 32       	cpi	r24, 0x2E	; 46
- 410:	31 e0       	ldi	r19, 0x01	; 1
- 412:	93 07       	cpc	r25, r19
- 414:	09 f0       	breq	.+2      	; 0x418 <__LOCK_REGION_LENGTH__+0x18>
- 416:	f1 c0       	rjmp	.+482    	; 0x5fa <__stack+0x19b>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:154
-				case 41:memccpy(screen,MIN,0,3);break;
-				case 50:convert_temp(0);break;
-				case 51:convert_temp(500);break;
-				case 300:memccpy(screen,PID_P,0,3);break;
-				case 301:memccpy(screen,PID_I,0,3);break;
-				case 302:memccpy(screen,PID_D,0,3);break;
- 418:	23 e0       	ldi	r18, 0x03	; 3
- 41a:	30 e0       	ldi	r19, 0x00	; 0
- 41c:	40 e0       	ldi	r20, 0x00	; 0
- 41e:	50 e0       	ldi	r21, 0x00	; 0
- 420:	66 e8       	ldi	r22, 0x86	; 134
- 422:	70 e0       	ldi	r23, 0x00	; 0
- 424:	e5 c0       	rjmp	.+458    	; 0x5f0 <__stack+0x191>
+ 336:	80 91 65 00 	lds	r24, 0x0065	; 0x800065 <timerManager+0x4>
+ 33a:	90 91 66 00 	lds	r25, 0x0066	; 0x800066 <timerManager+0x5>
+ 33e:	a0 91 67 00 	lds	r26, 0x0067	; 0x800067 <timerManager+0x6>
+ 342:	b0 91 68 00 	lds	r27, 0x0068	; 0x800068 <timerManager+0x7>
+ 346:	85 36       	cpi	r24, 0x65	; 101
+ 348:	91 05       	cpc	r25, r1
+ 34a:	a1 05       	cpc	r26, r1
+ 34c:	b1 05       	cpc	r27, r1
+ 34e:	08 f4       	brcc	.+2      	; 0x352 <main+0x198>
+ 350:	c2 c0       	rjmp	.+388    	; 0x4d6 <__stack+0x77>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:138
+			switch (menuNum){
+ 352:	80 91 af 00 	lds	r24, 0x00AF	; 0x8000af <menuNum>
+ 356:	90 91 b0 00 	lds	r25, 0x00B0	; 0x8000b0 <menuNum+0x1>
+ 35a:	84 31       	cpi	r24, 0x14	; 20
+ 35c:	91 05       	cpc	r25, r1
+ 35e:	09 f4       	brne	.+2      	; 0x362 <main+0x1a8>
+ 360:	65 c0       	rjmp	.+202    	; 0x42c <__LOCK_REGION_LENGTH__+0x2c>
+ 362:	10 f5       	brcc	.+68     	; 0x3a8 <main+0x1ee>
+ 364:	84 30       	cpi	r24, 0x04	; 4
+ 366:	91 05       	cpc	r25, r1
+ 368:	09 f4       	brne	.+2      	; 0x36c <main+0x1b2>
+ 36a:	67 c0       	rjmp	.+206    	; 0x43a <__LOCK_REGION_LENGTH__+0x3a>
+ 36c:	88 f4       	brcc	.+34     	; 0x390 <main+0x1d6>
+ 36e:	82 30       	cpi	r24, 0x02	; 2
+ 370:	91 05       	cpc	r25, r1
+ 372:	09 f4       	brne	.+2      	; 0x376 <main+0x1bc>
+ 374:	46 c0       	rjmp	.+140    	; 0x402 <__LOCK_REGION_LENGTH__+0x2>
+ 376:	08 f0       	brcs	.+2      	; 0x37a <main+0x1c0>
+ 378:	4b c0       	rjmp	.+150    	; 0x410 <__LOCK_REGION_LENGTH__+0x10>
+ 37a:	81 30       	cpi	r24, 0x01	; 1
+ 37c:	91 05       	cpc	r25, r1
+ 37e:	09 f0       	breq	.+2      	; 0x382 <main+0x1c8>
+ 380:	88 c0       	rjmp	.+272    	; 0x492 <__stack+0x33>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:140
+				//case 1:memccpy(screen,DEF,0,3);break;
+				case 1:memccpy(screen,MOD,0,3);break;
+ 382:	23 e0       	ldi	r18, 0x03	; 3
+ 384:	30 e0       	ldi	r19, 0x00	; 0
+ 386:	40 e0       	ldi	r20, 0x00	; 0
+ 388:	50 e0       	ldi	r21, 0x00	; 0
+ 38a:	63 ea       	ldi	r22, 0xA3	; 163
+ 38c:	70 e0       	ldi	r23, 0x00	; 0
+ 38e:	7c c0       	rjmp	.+248    	; 0x488 <__stack+0x29>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:138
+		if (timerManager[0]>=SCREEN_UPDATE_DELAY){
+			prnt();
 			timerManager[0]=0;
 		}
 		if (timerManager[1]>100){
 			switch (menuNum){
-				case 1:memccpy(screen,DEF,0,3);break;
-				case 2:memccpy(screen,MOD,0,3);break;
- 426:	23 e0       	ldi	r18, 0x03	; 3
- 428:	30 e0       	ldi	r19, 0x00	; 0
- 42a:	40 e0       	ldi	r20, 0x00	; 0
- 42c:	50 e0       	ldi	r21, 0x00	; 0
- 42e:	64 ea       	ldi	r22, 0xA4	; 164
- 430:	70 e0       	ldi	r23, 0x00	; 0
- 432:	de c0       	rjmp	.+444    	; 0x5f0 <__stack+0x191>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:379
-}
-//Функции меню
-void set_default_temp(void){
-	while(1){
-		if(timerManager[0]>=SCREEN_UPDATE_DELAY){prnt();timerManager[0]=0;}
-		if(timerManager[1]>100){convert_temp(sel_temp);PORTA ^= (1<<7);timerManager[1]=0;}
- 434:	80 91 64 00 	lds	r24, 0x0064	; 0x800064 <__DATA_REGION_ORIGIN__+0x4>
- 438:	90 91 65 00 	lds	r25, 0x0065	; 0x800065 <__DATA_REGION_ORIGIN__+0x5>
- 43c:	a0 91 66 00 	lds	r26, 0x0066	; 0x800066 <__DATA_REGION_ORIGIN__+0x6>
- 440:	b0 91 67 00 	lds	r27, 0x0067	; 0x800067 <__DATA_REGION_ORIGIN__+0x7>
- 444:	85 36       	cpi	r24, 0x65	; 101
- 446:	91 05       	cpc	r25, r1
- 448:	a1 05       	cpc	r26, r1
- 44a:	b1 05       	cpc	r27, r1
- 44c:	88 f0       	brcs	.+34     	; 0x470 <__stack+0x11>
- 44e:	80 91 74 00 	lds	r24, 0x0074	; 0x800074 <sel_temp>
- 452:	90 91 75 00 	lds	r25, 0x0075	; 0x800075 <sel_temp+0x1>
- 456:	0e 94 80 00 	call	0x100	; 0x100 <convert_temp>
- 45a:	8b b3       	in	r24, 0x1b	; 27
- 45c:	80 58       	subi	r24, 0x80	; 128
- 45e:	8b bb       	out	0x1b, r24	; 27
- 460:	10 92 64 00 	sts	0x0064, r1	; 0x800064 <__DATA_REGION_ORIGIN__+0x4>
- 464:	10 92 65 00 	sts	0x0065, r1	; 0x800065 <__DATA_REGION_ORIGIN__+0x5>
- 468:	10 92 66 00 	sts	0x0066, r1	; 0x800066 <__DATA_REGION_ORIGIN__+0x6>
- 46c:	10 92 67 00 	sts	0x0067, r1	; 0x800067 <__DATA_REGION_ORIGIN__+0x7>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:380
+ 390:	8b 30       	cpi	r24, 0x0B	; 11
+ 392:	91 05       	cpc	r25, r1
+ 394:	e9 f1       	breq	.+122    	; 0x410 <__LOCK_REGION_LENGTH__+0x10>
+ 396:	8c 30       	cpi	r24, 0x0C	; 12
+ 398:	91 05       	cpc	r25, r1
+ 39a:	09 f4       	brne	.+2      	; 0x39e <main+0x1e4>
+ 39c:	40 c0       	rjmp	.+128    	; 0x41e <__LOCK_REGION_LENGTH__+0x1e>
+ 39e:	8a 30       	cpi	r24, 0x0A	; 10
+ 3a0:	91 05       	cpc	r25, r1
+ 3a2:	09 f0       	breq	.+2      	; 0x3a6 <main+0x1ec>
+ 3a4:	76 c0       	rjmp	.+236    	; 0x492 <__stack+0x33>
+ 3a6:	2d c0       	rjmp	.+90     	; 0x402 <__LOCK_REGION_LENGTH__+0x2>
+ 3a8:	88 32       	cpi	r24, 0x28	; 40
+ 3aa:	91 05       	cpc	r25, r1
+ 3ac:	09 f4       	brne	.+2      	; 0x3b0 <main+0x1f6>
+ 3ae:	5a c0       	rjmp	.+180    	; 0x464 <__stack+0x5>
+ 3b0:	68 f4       	brcc	.+26     	; 0x3cc <main+0x212>
+ 3b2:	8e 31       	cpi	r24, 0x1E	; 30
+ 3b4:	91 05       	cpc	r25, r1
+ 3b6:	09 f4       	brne	.+2      	; 0x3ba <main+0x200>
+ 3b8:	47 c0       	rjmp	.+142    	; 0x448 <__LOCK_REGION_LENGTH__+0x48>
+ 3ba:	8f 31       	cpi	r24, 0x1F	; 31
+ 3bc:	91 05       	cpc	r25, r1
+ 3be:	09 f4       	brne	.+2      	; 0x3c2 <main+0x208>
+ 3c0:	4a c0       	rjmp	.+148    	; 0x456 <__LOCK_REGION_LENGTH__+0x56>
+ 3c2:	85 31       	cpi	r24, 0x15	; 21
+ 3c4:	91 05       	cpc	r25, r1
+ 3c6:	09 f0       	breq	.+2      	; 0x3ca <main+0x210>
+ 3c8:	64 c0       	rjmp	.+200    	; 0x492 <__stack+0x33>
+ 3ca:	37 c0       	rjmp	.+110    	; 0x43a <__LOCK_REGION_LENGTH__+0x3a>
+ 3cc:	88 3c       	cpi	r24, 0xC8	; 200
+ 3ce:	91 05       	cpc	r25, r1
+ 3d0:	09 f4       	brne	.+2      	; 0x3d4 <main+0x21a>
+ 3d2:	4d c0       	rjmp	.+154    	; 0x46e <__stack+0xf>
+ 3d4:	38 f4       	brcc	.+14     	; 0x3e4 <main+0x22a>
+ 3d6:	89 32       	cpi	r24, 0x29	; 41
+ 3d8:	91 05       	cpc	r25, r1
+ 3da:	09 f0       	breq	.+2      	; 0x3de <main+0x224>
+ 3dc:	5a c0       	rjmp	.+180    	; 0x492 <__stack+0x33>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:153
+				case 20:memccpy(screen,SET,0,3);break;
+				case 21:memccpy(screen,CAL,0,3);break;
+				case 30:memccpy(screen,MAX,0,3);break;
+				case 31:memccpy(screen,MIN,0,3);break;
+				case 40:convert_temp(0);break;
+				case 41:convert_temp(500);break;
+ 3de:	84 ef       	ldi	r24, 0xF4	; 244
+ 3e0:	91 e0       	ldi	r25, 0x01	; 1
+ 3e2:	42 c0       	rjmp	.+132    	; 0x468 <__stack+0x9>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:138
+		if (timerManager[0]>=SCREEN_UPDATE_DELAY){
+			prnt();
+			timerManager[0]=0;
+		}
+		if (timerManager[1]>100){
+			switch (menuNum){
+ 3e4:	89 3c       	cpi	r24, 0xC9	; 201
+ 3e6:	91 05       	cpc	r25, r1
+ 3e8:	09 f4       	brne	.+2      	; 0x3ec <main+0x232>
+ 3ea:	48 c0       	rjmp	.+144    	; 0x47c <__stack+0x1d>
+ 3ec:	8a 3c       	cpi	r24, 0xCA	; 202
+ 3ee:	91 05       	cpc	r25, r1
+ 3f0:	09 f0       	breq	.+2      	; 0x3f4 <main+0x23a>
+ 3f2:	4f c0       	rjmp	.+158    	; 0x492 <__stack+0x33>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:156
+				case 31:memccpy(screen,MIN,0,3);break;
+				case 40:convert_temp(0);break;
+				case 41:convert_temp(500);break;
+				case 200:memccpy(screen,PID_P,0,3);break;
+				case 201:memccpy(screen,PID_I,0,3);break;
+				case 202:memccpy(screen,PID_D,0,3);break;
+ 3f4:	23 e0       	ldi	r18, 0x03	; 3
+ 3f6:	30 e0       	ldi	r19, 0x00	; 0
+ 3f8:	40 e0       	ldi	r20, 0x00	; 0
+ 3fa:	50 e0       	ldi	r21, 0x00	; 0
+ 3fc:	65 e8       	ldi	r22, 0x85	; 133
+ 3fe:	70 e0       	ldi	r23, 0x00	; 0
+ 400:	43 c0       	rjmp	.+134    	; 0x488 <__stack+0x29>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:145
+				case 1:memccpy(screen,MOD,0,3);break;
+				case 2:memccpy(screen,PID,0,3);break;
+				case 3:memccpy(screen,HYS,0,3);break;
+				case 4:memccpy(screen,CAL,0,3);break;
+				//case 10:set_default_temp();break;//Выбор температуры по-умолчанию
+				case 10:memccpy(screen,PID,0,3);break;
+ 402:	23 e0       	ldi	r18, 0x03	; 3
+ 404:	30 e0       	ldi	r19, 0x00	; 0
+ 406:	40 e0       	ldi	r20, 0x00	; 0
+ 408:	50 e0       	ldi	r21, 0x00	; 0
+ 40a:	60 ea       	ldi	r22, 0xA0	; 160
+ 40c:	70 e0       	ldi	r23, 0x00	; 0
+ 40e:	3c c0       	rjmp	.+120    	; 0x488 <__stack+0x29>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:146
+				case 11:memccpy(screen,HYS,0,3);break;
+ 410:	23 e0       	ldi	r18, 0x03	; 3
+ 412:	30 e0       	ldi	r19, 0x00	; 0
+ 414:	40 e0       	ldi	r20, 0x00	; 0
+ 416:	50 e0       	ldi	r21, 0x00	; 0
+ 418:	6d e9       	ldi	r22, 0x9D	; 157
+ 41a:	70 e0       	ldi	r23, 0x00	; 0
+ 41c:	35 c0       	rjmp	.+106    	; 0x488 <__stack+0x29>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:147
+				case 12:memccpy(screen,REL,0,3);break;
+ 41e:	23 e0       	ldi	r18, 0x03	; 3
+ 420:	30 e0       	ldi	r19, 0x00	; 0
+ 422:	40 e0       	ldi	r20, 0x00	; 0
+ 424:	50 e0       	ldi	r21, 0x00	; 0
+ 426:	67 e9       	ldi	r22, 0x97	; 151
+ 428:	70 e0       	ldi	r23, 0x00	; 0
+ 42a:	2e c0       	rjmp	.+92     	; 0x488 <__stack+0x29>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:148
+				case 20:memccpy(screen,SET,0,3);break;
+ 42c:	23 e0       	ldi	r18, 0x03	; 3
+ 42e:	30 e0       	ldi	r19, 0x00	; 0
+ 430:	40 e0       	ldi	r20, 0x00	; 0
+ 432:	50 e0       	ldi	r21, 0x00	; 0
+ 434:	64 e9       	ldi	r22, 0x94	; 148
+ 436:	70 e0       	ldi	r23, 0x00	; 0
+ 438:	27 c0       	rjmp	.+78     	; 0x488 <__stack+0x29>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:149
+				case 21:memccpy(screen,CAL,0,3);break;
+ 43a:	23 e0       	ldi	r18, 0x03	; 3
+ 43c:	30 e0       	ldi	r19, 0x00	; 0
+ 43e:	40 e0       	ldi	r20, 0x00	; 0
+ 440:	50 e0       	ldi	r21, 0x00	; 0
+ 442:	6a e9       	ldi	r22, 0x9A	; 154
+ 444:	70 e0       	ldi	r23, 0x00	; 0
+ 446:	20 c0       	rjmp	.+64     	; 0x488 <__stack+0x29>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:150
+				case 30:memccpy(screen,MAX,0,3);break;
+ 448:	23 e0       	ldi	r18, 0x03	; 3
+ 44a:	30 e0       	ldi	r19, 0x00	; 0
+ 44c:	40 e0       	ldi	r20, 0x00	; 0
+ 44e:	50 e0       	ldi	r21, 0x00	; 0
+ 450:	61 e9       	ldi	r22, 0x91	; 145
+ 452:	70 e0       	ldi	r23, 0x00	; 0
+ 454:	19 c0       	rjmp	.+50     	; 0x488 <__stack+0x29>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:151
+				case 31:memccpy(screen,MIN,0,3);break;
+ 456:	23 e0       	ldi	r18, 0x03	; 3
+ 458:	30 e0       	ldi	r19, 0x00	; 0
+ 45a:	40 e0       	ldi	r20, 0x00	; 0
+ 45c:	50 e0       	ldi	r21, 0x00	; 0
+ 45e:	6e e8       	ldi	r22, 0x8E	; 142
+ 460:	70 e0       	ldi	r23, 0x00	; 0
+ 462:	12 c0       	rjmp	.+36     	; 0x488 <__stack+0x29>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:152
+				case 40:convert_temp(0);break;
+ 464:	80 e0       	ldi	r24, 0x00	; 0
+ 466:	90 e0       	ldi	r25, 0x00	; 0
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:153
+				case 41:convert_temp(500);break;
+ 468:	0e 94 87 00 	call	0x10e	; 0x10e <convert_temp>
+ 46c:	29 c0       	rjmp	.+82     	; 0x4c0 <__stack+0x61>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:154
+				case 200:memccpy(screen,PID_P,0,3);break;
+ 46e:	23 e0       	ldi	r18, 0x03	; 3
+ 470:	30 e0       	ldi	r19, 0x00	; 0
+ 472:	40 e0       	ldi	r20, 0x00	; 0
+ 474:	50 e0       	ldi	r21, 0x00	; 0
+ 476:	6b e8       	ldi	r22, 0x8B	; 139
+ 478:	70 e0       	ldi	r23, 0x00	; 0
+ 47a:	06 c0       	rjmp	.+12     	; 0x488 <__stack+0x29>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:155
+				case 201:memccpy(screen,PID_I,0,3);break;
+ 47c:	23 e0       	ldi	r18, 0x03	; 3
+ 47e:	30 e0       	ldi	r19, 0x00	; 0
+ 480:	40 e0       	ldi	r20, 0x00	; 0
+ 482:	50 e0       	ldi	r21, 0x00	; 0
+ 484:	68 e8       	ldi	r22, 0x88	; 136
+ 486:	70 e0       	ldi	r23, 0x00	; 0
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:156
+				case 202:memccpy(screen,PID_D,0,3);break;
+ 488:	85 e7       	ldi	r24, 0x75	; 117
+ 48a:	90 e0       	ldi	r25, 0x00	; 0
+ 48c:	0e 94 6d 04 	call	0x8da	; 0x8da <memccpy>
+ 490:	17 c0       	rjmp	.+46     	; 0x4c0 <__stack+0x61>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:158
+				default:
+					if(lastAct==1)menuNum/=10;
+ 492:	20 91 ae 00 	lds	r18, 0x00AE	; 0x8000ae <lastAct>
+ 496:	21 30       	cpi	r18, 0x01	; 1
+ 498:	41 f4       	brne	.+16     	; 0x4aa <__stack+0x4b>
+ 49a:	b8 01       	movw	r22, r16
+ 49c:	0e 94 7b 04 	call	0x8f6	; 0x8f6 <__udivmodhi4>
+ 4a0:	70 93 b0 00 	sts	0x00B0, r23	; 0x8000b0 <menuNum+0x1>
+ 4a4:	60 93 af 00 	sts	0x00AF, r22	; 0x8000af <menuNum>
+ 4a8:	0b c0       	rjmp	.+22     	; 0x4c0 <__stack+0x61>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:159
+					if(lastAct==2)menuNum--;
+ 4aa:	22 30       	cpi	r18, 0x02	; 2
+ 4ac:	11 f4       	brne	.+4      	; 0x4b2 <__stack+0x53>
+ 4ae:	01 97       	sbiw	r24, 0x01	; 1
+ 4b0:	03 c0       	rjmp	.+6      	; 0x4b8 <__stack+0x59>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:160
+					if(lastAct==3)menuNum++;
+ 4b2:	23 30       	cpi	r18, 0x03	; 3
+ 4b4:	29 f4       	brne	.+10     	; 0x4c0 <__stack+0x61>
+ 4b6:	01 96       	adiw	r24, 0x01	; 1
+ 4b8:	90 93 b0 00 	sts	0x00B0, r25	; 0x8000b0 <menuNum+0x1>
+ 4bc:	80 93 af 00 	sts	0x00AF, r24	; 0x8000af <menuNum>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:163
+			}
+			//convert_temp(menuNum);
+			PORTA ^= (1<<7);	//Индикация инженерного меню. Моргаем точками разрядов.
+ 4c0:	8b b3       	in	r24, 0x1b	; 27
+ 4c2:	80 58       	subi	r24, 0x80	; 128
+ 4c4:	8b bb       	out	0x1b, r24	; 27
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:164
+			timerManager[1]=0;
+ 4c6:	10 92 65 00 	sts	0x0065, r1	; 0x800065 <timerManager+0x4>
+ 4ca:	10 92 66 00 	sts	0x0066, r1	; 0x800066 <timerManager+0x5>
+ 4ce:	10 92 67 00 	sts	0x0067, r1	; 0x800067 <timerManager+0x6>
+ 4d2:	10 92 68 00 	sts	0x0068, r1	; 0x800068 <timerManager+0x7>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:167
+		}
+		
 		if(timerManager[2]>=BUTTONS_READ_DELAY){
- 470:	80 91 68 00 	lds	r24, 0x0068	; 0x800068 <__DATA_REGION_ORIGIN__+0x8>
- 474:	90 91 69 00 	lds	r25, 0x0069	; 0x800069 <__DATA_REGION_ORIGIN__+0x9>
- 478:	a0 91 6a 00 	lds	r26, 0x006A	; 0x80006a <__DATA_REGION_ORIGIN__+0xa>
- 47c:	b0 91 6b 00 	lds	r27, 0x006B	; 0x80006b <__DATA_REGION_ORIGIN__+0xb>
- 480:	c2 97       	sbiw	r24, 0x32	; 50
- 482:	a1 05       	cpc	r26, r1
- 484:	b1 05       	cpc	r27, r1
- 486:	b8 f4       	brcc	.+46     	; 0x4b6 <__stack+0x57>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:378
-return EEDR;
-}
-//Функции меню
-void set_default_temp(void){
-	while(1){
-		if(timerManager[0]>=SCREEN_UPDATE_DELAY){prnt();timerManager[0]=0;}
- 488:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
- 48c:	90 91 61 00 	lds	r25, 0x0061	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
- 490:	a0 91 62 00 	lds	r26, 0x0062	; 0x800062 <__DATA_REGION_ORIGIN__+0x2>
- 494:	b0 91 63 00 	lds	r27, 0x0063	; 0x800063 <__DATA_REGION_ORIGIN__+0x3>
- 498:	05 97       	sbiw	r24, 0x05	; 5
- 49a:	a1 05       	cpc	r26, r1
- 49c:	b1 05       	cpc	r27, r1
- 49e:	50 f2       	brcs	.-108    	; 0x434 <__LOCK_REGION_LENGTH__+0x34>
- 4a0:	0e 94 51 00 	call	0xa2	; 0xa2 <prnt>
- 4a4:	10 92 60 00 	sts	0x0060, r1	; 0x800060 <__DATA_REGION_ORIGIN__>
- 4a8:	10 92 61 00 	sts	0x0061, r1	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
- 4ac:	10 92 62 00 	sts	0x0062, r1	; 0x800062 <__DATA_REGION_ORIGIN__+0x2>
- 4b0:	10 92 63 00 	sts	0x0063, r1	; 0x800063 <__DATA_REGION_ORIGIN__+0x3>
- 4b4:	bf cf       	rjmp	.-130    	; 0x434 <__LOCK_REGION_LENGTH__+0x34>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:383
-		if(timerManager[1]>100){convert_temp(sel_temp);PORTA ^= (1<<7);timerManager[1]=0;}
+ 4d6:	80 91 69 00 	lds	r24, 0x0069	; 0x800069 <timerManager+0x8>
+ 4da:	90 91 6a 00 	lds	r25, 0x006A	; 0x80006a <timerManager+0x9>
+ 4de:	a0 91 6b 00 	lds	r26, 0x006B	; 0x80006b <timerManager+0xa>
+ 4e2:	b0 91 6c 00 	lds	r27, 0x006C	; 0x80006c <timerManager+0xb>
+ 4e6:	c2 97       	sbiw	r24, 0x32	; 50
+ 4e8:	a1 05       	cpc	r26, r1
+ 4ea:	b1 05       	cpc	r27, r1
+ 4ec:	08 f4       	brcc	.+2      	; 0x4f0 <__stack+0x91>
+ 4ee:	06 cf       	rjmp	.-500    	; 0x2fc <main+0x142>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:169
+			static uint8_t btnStatus;
+			if (btnStatus!=(PINB&BTN_MASK)) {
+ 4f0:	86 b3       	in	r24, 0x16	; 22
+ 4f2:	8f 70       	andi	r24, 0x0F	; 15
+ 4f4:	90 91 ad 00 	lds	r25, 0x00AD	; 0x8000ad <btnStatus.2169>
+ 4f8:	89 13       	cpse	r24, r25
+ 4fa:	08 c0       	rjmp	.+16     	; 0x50c <__stack+0xad>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:179
+					case BTN3:menuNum--;lastAct=3; break;
+					case BTN4:menuNum/=10;lastAct=4; break;
+				}
+				while ((PINB&BTN_MASK)!=BTN_MASK){PORTA=0x00;}	//Пока кнопку не отпустят - стопорим дальнейшее выполнение.
+			}
+			if (menuNum<=0 && lastAct==4){ //Продолжаем загрузку в нормальном режиме.
+ 4fc:	80 91 af 00 	lds	r24, 0x00AF	; 0x8000af <menuNum>
+ 500:	90 91 b0 00 	lds	r25, 0x00B0	; 0x8000b0 <menuNum+0x1>
+ 504:	89 2b       	or	r24, r25
+ 506:	09 f4       	brne	.+2      	; 0x50a <__stack+0xab>
+ 508:	4a c0       	rjmp	.+148    	; 0x59e <__stack+0x13f>
+ 50a:	52 c0       	rjmp	.+164    	; 0x5b0 <__stack+0x151>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:170
+		}
+		
 		if(timerManager[2]>=BUTTONS_READ_DELAY){
 			static uint8_t btnStatus;
-			static uint8_t longPress;
-			if ((~PINB)&BTN_MASK && longPress<1){
- 4b6:	86 b3       	in	r24, 0x16	; 22
- 4b8:	90 e0       	ldi	r25, 0x00	; 0
- 4ba:	80 95       	com	r24
- 4bc:	90 95       	com	r25
- 4be:	8f 70       	andi	r24, 0x0F	; 15
- 4c0:	99 27       	eor	r25, r25
- 4c2:	89 2b       	or	r24, r25
- 4c4:	39 f0       	breq	.+14     	; 0x4d4 <__stack+0x75>
- 4c6:	80 91 aa 00 	lds	r24, 0x00AA	; 0x8000aa <__data_end>
- 4ca:	81 11       	cpse	r24, r1
- 4cc:	03 c0       	rjmp	.+6      	; 0x4d4 <__stack+0x75>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:384
-				longPress++;
- 4ce:	e0 92 aa 00 	sts	0x00AA, r14	; 0x8000aa <__data_end>
- 4d2:	02 c0       	rjmp	.+4      	; 0x4d8 <__stack+0x79>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:386
-			}else {
-				longPress=0;
- 4d4:	10 92 aa 00 	sts	0x00AA, r1	; 0x8000aa <__data_end>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:388
-			}
-			if (longPress==1) {
- 4d8:	80 91 aa 00 	lds	r24, 0x00AA	; 0x8000aa <__data_end>
- 4dc:	81 30       	cpi	r24, 0x01	; 1
- 4de:	09 f0       	breq	.+2      	; 0x4e2 <__stack+0x83>
- 4e0:	49 c0       	rjmp	.+146    	; 0x574 <__stack+0x115>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:389
+			if (btnStatus!=(PINB&BTN_MASK)) {
 				btnStatus = (PINB&BTN_MASK);
- 4e2:	86 b3       	in	r24, 0x16	; 22
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:390
+ 50c:	86 b3       	in	r24, 0x16	; 22
+ 50e:	8f 70       	andi	r24, 0x0F	; 15
+ 510:	80 93 ad 00 	sts	0x00AD, r24	; 0x8000ad <btnStatus.2169>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:171
 				switch (btnStatus){
- 4e4:	8f 70       	andi	r24, 0x0F	; 15
- 4e6:	8b 30       	cpi	r24, 0x0B	; 11
- 4e8:	49 f1       	breq	.+82     	; 0x53c <__stack+0xdd>
- 4ea:	f8 f4       	brcc	.+62     	; 0x52a <__stack+0xcb>
- 4ec:	87 30       	cpi	r24, 0x07	; 7
- 4ee:	09 f0       	breq	.+2      	; 0x4f2 <__stack+0x93>
- 4f0:	41 c0       	rjmp	.+130    	; 0x574 <__stack+0x115>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:391
-					case BTN1:menuNum/=10;
- 4f2:	80 91 b6 00 	lds	r24, 0x00B6	; 0x8000b6 <menuNum>
- 4f6:	90 91 b7 00 	lds	r25, 0x00B7	; 0x8000b7 <menuNum+0x1>
- 4fa:	b8 01       	movw	r22, r16
- 4fc:	0e 94 43 05 	call	0xa86	; 0xa86 <__udivmodhi4>
- 500:	70 93 b7 00 	sts	0x00B7, r23	; 0x8000b7 <menuNum+0x1>
- 504:	60 93 b6 00 	sts	0x00B6, r22	; 0x8000b6 <menuNum>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:392
-						ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
- 508:	7f b6       	in	r7, 0x3f	; 63
+ 514:	8b 30       	cpi	r24, 0x0B	; 11
+ 516:	29 f1       	breq	.+74     	; 0x562 <__stack+0x103>
+ 518:	90 f4       	brcc	.+36     	; 0x53e <__stack+0xdf>
+ 51a:	87 30       	cpi	r24, 0x07	; 7
+ 51c:	c9 f5       	brne	.+114    	; 0x590 <__stack+0x131>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:172
+					case BTN1:menuNum*=10;lastAct=1;break;
+ 51e:	20 91 af 00 	lds	r18, 0x00AF	; 0x8000af <menuNum>
+ 522:	30 91 b0 00 	lds	r19, 0x00B0	; 0x8000b0 <menuNum+0x1>
+ 526:	a2 9e       	mul	r10, r18
+ 528:	c0 01       	movw	r24, r0
+ 52a:	a3 9e       	mul	r10, r19
+ 52c:	90 0d       	add	r25, r0
+ 52e:	11 24       	eor	r1, r1
+ 530:	90 93 b0 00 	sts	0x00B0, r25	; 0x8000b0 <menuNum+0x1>
+ 534:	80 93 af 00 	sts	0x00AF, r24	; 0x8000af <menuNum>
+ 538:	90 92 ae 00 	sts	0x00AE, r9	; 0x8000ae <lastAct>
+ 53c:	29 c0       	rjmp	.+82     	; 0x590 <__stack+0x131>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:171
+		
+		if(timerManager[2]>=BUTTONS_READ_DELAY){
+			static uint8_t btnStatus;
+			if (btnStatus!=(PINB&BTN_MASK)) {
+				btnStatus = (PINB&BTN_MASK);
+				switch (btnStatus){
+ 53e:	8d 30       	cpi	r24, 0x0D	; 13
+ 540:	e1 f0       	breq	.+56     	; 0x57a <__stack+0x11b>
+ 542:	8e 30       	cpi	r24, 0x0E	; 14
+ 544:	29 f5       	brne	.+74     	; 0x590 <__stack+0x131>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:175
+					case BTN1:menuNum*=10;lastAct=1;break;
+					case BTN2:menuNum++;lastAct=2; break;
+					case BTN3:menuNum--;lastAct=3; break;
+					case BTN4:menuNum/=10;lastAct=4; break;
+ 546:	80 91 af 00 	lds	r24, 0x00AF	; 0x8000af <menuNum>
+ 54a:	90 91 b0 00 	lds	r25, 0x00B0	; 0x8000b0 <menuNum+0x1>
+ 54e:	b8 01       	movw	r22, r16
+ 550:	0e 94 7b 04 	call	0x8f6	; 0x8f6 <__udivmodhi4>
+ 554:	70 93 b0 00 	sts	0x00B0, r23	; 0x8000b0 <menuNum+0x1>
+ 558:	60 93 af 00 	sts	0x00AF, r22	; 0x8000af <menuNum>
+ 55c:	b0 92 ae 00 	sts	0x00AE, r11	; 0x8000ae <lastAct>
+ 560:	17 c0       	rjmp	.+46     	; 0x590 <__stack+0x131>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:173
+			static uint8_t btnStatus;
+			if (btnStatus!=(PINB&BTN_MASK)) {
+				btnStatus = (PINB&BTN_MASK);
+				switch (btnStatus){
+					case BTN1:menuNum*=10;lastAct=1;break;
+					case BTN2:menuNum++;lastAct=2; break;
+ 562:	80 91 af 00 	lds	r24, 0x00AF	; 0x8000af <menuNum>
+ 566:	90 91 b0 00 	lds	r25, 0x00B0	; 0x8000b0 <menuNum+0x1>
+ 56a:	01 96       	adiw	r24, 0x01	; 1
+ 56c:	90 93 b0 00 	sts	0x00B0, r25	; 0x8000b0 <menuNum+0x1>
+ 570:	80 93 af 00 	sts	0x00AF, r24	; 0x8000af <menuNum>
+ 574:	d0 92 ae 00 	sts	0x00AE, r13	; 0x8000ae <lastAct>
+ 578:	0b c0       	rjmp	.+22     	; 0x590 <__stack+0x131>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:174
+					case BTN3:menuNum--;lastAct=3; break;
+ 57a:	80 91 af 00 	lds	r24, 0x00AF	; 0x8000af <menuNum>
+ 57e:	90 91 b0 00 	lds	r25, 0x00B0	; 0x8000b0 <menuNum+0x1>
+ 582:	01 97       	sbiw	r24, 0x01	; 1
+ 584:	90 93 b0 00 	sts	0x00B0, r25	; 0x8000b0 <menuNum+0x1>
+ 588:	80 93 af 00 	sts	0x00AF, r24	; 0x8000af <menuNum>
+ 58c:	c0 92 ae 00 	sts	0x00AE, r12	; 0x8000ae <lastAct>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:177
+					case BTN4:menuNum/=10;lastAct=4; break;
+				}
+				while ((PINB&BTN_MASK)!=BTN_MASK){PORTA=0x00;}	//Пока кнопку не отпустят - стопорим дальнейшее выполнение.
+ 590:	86 b3       	in	r24, 0x16	; 22
+ 592:	8f 70       	andi	r24, 0x0F	; 15
+ 594:	8f 30       	cpi	r24, 0x0F	; 15
+ 596:	09 f4       	brne	.+2      	; 0x59a <__stack+0x13b>
+ 598:	b1 cf       	rjmp	.-158    	; 0x4fc <__stack+0x9d>
+ 59a:	1b ba       	out	0x1b, r1	; 27
+ 59c:	f9 cf       	rjmp	.-14     	; 0x590 <__stack+0x131>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:179
+			}
+			if (menuNum<=0 && lastAct==4){ //Продолжаем загрузку в нормальном режиме.
+ 59e:	80 91 ae 00 	lds	r24, 0x00AE	; 0x8000ae <lastAct>
+ 5a2:	84 30       	cpi	r24, 0x04	; 4
+ 5a4:	29 f4       	brne	.+10     	; 0x5b0 <__stack+0x151>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:180
+				flags=NORMAL_MODE;
+ 5a6:	f0 92 b2 00 	sts	0x00B2, r15	; 0x8000b2 <flags+0x1>
+ 5aa:	e0 92 b1 00 	sts	0x00B1, r14	; 0x8000b1 <flags>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:181
+				PORTA &= ~(1<<7);
+ 5ae:	df 98       	cbi	0x1b, 7	; 27
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:183
+			}
+			timerManager[2]=0;
+ 5b0:	10 92 69 00 	sts	0x0069, r1	; 0x800069 <timerManager+0x8>
+ 5b4:	10 92 6a 00 	sts	0x006A, r1	; 0x80006a <timerManager+0x9>
+ 5b8:	10 92 6b 00 	sts	0x006B, r1	; 0x80006b <timerManager+0xa>
+ 5bc:	10 92 6c 00 	sts	0x006C, r1	; 0x80006c <timerManager+0xb>
+ 5c0:	9d ce       	rjmp	.-710    	; 0x2fc <main+0x142>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:386
+							EEPROM_write(DEFAULT_TEMP_LBYTE,(unsigned char)sel_temp);	
+						}
+					}
+				break;
+			case BTN2:								//Кнопка +
+				if (sel_temp<=MAX_TEMP-step)sel_temp+=step;
+ 5c2:	0c e9       	ldi	r16, 0x9C	; 156
+ 5c4:	1f e0       	ldi	r17, 0x0F	; 15
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:413
+	if ((raw_data>>2)&1) {
+		flags |= OPEN_THERMOCOUPLE;
+		curr_temp = 0;
+	}else{
+		flags &= ~(OPEN_THERMOCOUPLE);
+		filtered_data= (((filtered_data*(FILTER_FACTOR-1))+(raw_data>>3))/FILTER_FACTOR); //Усредняем
+ 5c6:	75 e0       	ldi	r23, 0x05	; 5
+ 5c8:	c7 2e       	mov	r12, r23
+ 5ca:	e6 e0       	ldi	r30, 0x06	; 6
+ 5cc:	ee 2e       	mov	r14, r30
+ 5ce:	f1 2c       	mov	r15, r1
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:192
+//Основное рабочее тело программы.
+//------------------------------------------------------------------
+    while (1) 
+    {
+//------------------------------------------------------------------
+		if (timerManager[0]>=SCREEN_UPDATE_DELAY){
+ 5d0:	80 91 61 00 	lds	r24, 0x0061	; 0x800061 <timerManager>
+ 5d4:	90 91 62 00 	lds	r25, 0x0062	; 0x800062 <timerManager+0x1>
+ 5d8:	a0 91 63 00 	lds	r26, 0x0063	; 0x800063 <timerManager+0x2>
+ 5dc:	b0 91 64 00 	lds	r27, 0x0064	; 0x800064 <timerManager+0x3>
+ 5e0:	05 97       	sbiw	r24, 0x05	; 5
+ 5e2:	a1 05       	cpc	r26, r1
+ 5e4:	b1 05       	cpc	r27, r1
+ 5e6:	50 f0       	brcs	.+20     	; 0x5fc <__stack+0x19d>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:193
+			prnt();
+ 5e8:	0e 94 58 00 	call	0xb0	; 0xb0 <prnt>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:194
+			timerManager[0]=0;
+ 5ec:	10 92 61 00 	sts	0x0061, r1	; 0x800061 <timerManager>
+ 5f0:	10 92 62 00 	sts	0x0062, r1	; 0x800062 <timerManager+0x1>
+ 5f4:	10 92 63 00 	sts	0x0063, r1	; 0x800063 <timerManager+0x2>
+ 5f8:	10 92 64 00 	sts	0x0064, r1	; 0x800064 <timerManager+0x3>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:197
+		}
+//------------------------------------------------------------------
+		if (timerManager[1]>=POINT_FLASH_DELAY){
+ 5fc:	80 91 65 00 	lds	r24, 0x0065	; 0x800065 <timerManager+0x4>
+ 600:	90 91 66 00 	lds	r25, 0x0066	; 0x800066 <timerManager+0x5>
+ 604:	a0 91 67 00 	lds	r26, 0x0067	; 0x800067 <timerManager+0x6>
+ 608:	b0 91 68 00 	lds	r27, 0x0068	; 0x800068 <timerManager+0x7>
+ 60c:	c2 97       	sbiw	r24, 0x32	; 50
+ 60e:	a1 05       	cpc	r26, r1
+ 610:	b1 05       	cpc	r27, r1
+ 612:	30 f1       	brcs	.+76     	; 0x660 <__stack+0x201>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:198
+			if (set_temp){
+ 614:	80 91 ab 00 	lds	r24, 0x00AB	; 0x8000ab <set_temp>
+ 618:	90 91 ac 00 	lds	r25, 0x00AC	; 0x8000ac <set_temp+0x1>
+ 61c:	00 97       	sbiw	r24, 0x00	; 0
+ 61e:	c1 f0       	breq	.+48     	; 0x650 <__stack+0x1f1>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:199
+				if (curr_temp>(set_temp+HYSTERESIS_MAX)){
+ 620:	03 96       	adiw	r24, 0x03	; 3
+ 622:	20 91 a9 00 	lds	r18, 0x00A9	; 0x8000a9 <curr_temp>
+ 626:	30 91 aa 00 	lds	r19, 0x00AA	; 0x8000aa <curr_temp+0x1>
+ 62a:	82 17       	cp	r24, r18
+ 62c:	93 07       	cpc	r25, r19
+ 62e:	10 f4       	brcc	.+4      	; 0x634 <__stack+0x1d5>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:200
+					PORTA &= ~(1<<7);
+ 630:	df 98       	cbi	0x1b, 7	; 27
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:201
+					PORTC &= ~(1<<3);
+ 632:	ab 98       	cbi	0x15, 3	; 21
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:203
+				}
+				if (curr_temp<(set_temp-HYSTERESIS_MIN)){
+ 634:	80 91 ab 00 	lds	r24, 0x00AB	; 0x8000ab <set_temp>
+ 638:	90 91 ac 00 	lds	r25, 0x00AC	; 0x8000ac <set_temp+0x1>
+ 63c:	03 97       	sbiw	r24, 0x03	; 3
+ 63e:	20 91 a9 00 	lds	r18, 0x00A9	; 0x8000a9 <curr_temp>
+ 642:	30 91 aa 00 	lds	r19, 0x00AA	; 0x8000aa <curr_temp+0x1>
+ 646:	28 17       	cp	r18, r24
+ 648:	39 07       	cpc	r19, r25
+ 64a:	10 f4       	brcc	.+4      	; 0x650 <__stack+0x1f1>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:204
+					PORTA |= (1<<7);
+ 64c:	df 9a       	sbi	0x1b, 7	; 27
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:205
+					PORTC |= (1<<3);
+ 64e:	ab 9a       	sbi	0x15, 3	; 21
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:208
+				}
+			}
+			timerManager[1]=0;
+ 650:	10 92 65 00 	sts	0x0065, r1	; 0x800065 <timerManager+0x4>
+ 654:	10 92 66 00 	sts	0x0066, r1	; 0x800066 <timerManager+0x5>
+ 658:	10 92 67 00 	sts	0x0067, r1	; 0x800067 <timerManager+0x6>
+ 65c:	10 92 68 00 	sts	0x0068, r1	; 0x800068 <timerManager+0x7>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:211
+		}
+//------------------------------------------------------------------
+		if(timerManager[2]>=BUTTONS_READ_DELAY){
+ 660:	80 91 69 00 	lds	r24, 0x0069	; 0x800069 <timerManager+0x8>
+ 664:	90 91 6a 00 	lds	r25, 0x006A	; 0x80006a <timerManager+0x9>
+ 668:	a0 91 6b 00 	lds	r26, 0x006B	; 0x80006b <timerManager+0xa>
+ 66c:	b0 91 6c 00 	lds	r27, 0x006C	; 0x80006c <timerManager+0xb>
+ 670:	c2 97       	sbiw	r24, 0x32	; 50
+ 672:	a1 05       	cpc	r26, r1
+ 674:	b1 05       	cpc	r27, r1
+ 676:	08 f4       	brcc	.+2      	; 0x67a <__stack+0x21b>
+ 678:	9b c0       	rjmp	.+310    	; 0x7b0 <__stack+0x351>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:334
+{
+
+	static uint8_t hold_timer;				//Количество циклов удержания
+	uint8_t step=4;							//Шаг приращения температуры с учетом сдвига влево (1<<2=4)
+	static uint8_t btn_prev = BTN_MASK;		//Предыдущие нажатые кнопки.
+	uint8_t btn_curr = PINB&BTN_MASK;		//Текущие нажатые кнопки.
+ 67a:	86 b3       	in	r24, 0x16	; 22
+ 67c:	8f 70       	andi	r24, 0x0F	; 15
+ 67e:	d8 2e       	mov	r13, r24
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:337
+	
+	
+	if (btn_prev==BTN_MASK)					//Если на предыдущем шаге не было нажато кнопок
+ 680:	30 91 60 00 	lds	r19, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
+ 684:	3f 30       	cpi	r19, 0x0F	; 15
+ 686:	29 f4       	brne	.+10     	; 0x692 <__stack+0x233>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:339
+	{
+		btn_prev = btn_curr;				//Записываем текущие показания
+ 688:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__DATA_REGION_ORIGIN__>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:340
+		hold_timer = 0;						//Сбрасываем таймер
+ 68c:	10 92 a6 00 	sts	0x00A6, r1	; 0x8000a6 <__data_end>
+ 690:	87 c0       	rjmp	.+270    	; 0x7a0 <__stack+0x341>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:344
+		return;								//Выходим
+	}
+
+	if(btn_curr==btn_prev)					//Если показания не поменялись
+ 692:	83 13       	cpse	r24, r19
+ 694:	0c c0       	rjmp	.+24     	; 0x6ae <__stack+0x24f>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:346
+	{
+		hold_timer++;						//Приращиваем таймер пока не переполнится
+ 696:	80 91 a6 00 	lds	r24, 0x00A6	; 0x8000a6 <__data_end>
+ 69a:	8f 5f       	subi	r24, 0xFF	; 255
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:347
+		if (hold_timer<HOLD_TIMER_MAX)		//Проверяем переполнение таймера
+ 69c:	84 31       	cpi	r24, 0x14	; 20
+ 69e:	18 f4       	brcc	.+6      	; 0x6a6 <__stack+0x247>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:346
+		return;								//Выходим
+	}
+
+	if(btn_curr==btn_prev)					//Если показания не поменялись
+	{
+		hold_timer++;						//Приращиваем таймер пока не переполнится
+ 6a0:	80 93 a6 00 	sts	0x00A6, r24	; 0x8000a6 <__data_end>
+ 6a4:	7d c0       	rjmp	.+250    	; 0x7a0 <__stack+0x341>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:351
+		if (hold_timer<HOLD_TIMER_MAX)		//Проверяем переполнение таймера
+		{
+			return;							//Не переполнился, выходим.
+		}else{
+			hold_timer = 0;					//Переполнился. Обнуляем.
+ 6a6:	10 92 a6 00 	sts	0x00A6, r1	; 0x8000a6 <__data_end>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:352
+			step = 40;						//Увеличиваем шаг изменения.
+ 6aa:	28 e2       	ldi	r18, 0x28	; 40
+ 6ac:	01 c0       	rjmp	.+2      	; 0x6b0 <__stack+0x251>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:332
+}*/
+void btnsread(void)
+{
+
+	static uint8_t hold_timer;				//Количество циклов удержания
+	uint8_t step=4;							//Шаг приращения температуры с учетом сдвига влево (1<<2=4)
+ 6ae:	24 e0       	ldi	r18, 0x04	; 4
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:358
+		}
+	}
+
+//Ниже идет отработка кнопок. Если программа сюда дошла, значит была нажата, а потом отпущена кнопка.
+//Кнопки работают по отпусканию, а не по нажатию. Это исключает вариации "Двойного" нажатия
+	if (flags&NORMAL_MODE)
+ 6b0:	80 91 b1 00 	lds	r24, 0x00B1	; 0x8000b1 <flags>
+ 6b4:	90 91 b2 00 	lds	r25, 0x00B2	; 0x8000b2 <flags+0x1>
+ 6b8:	80 ff       	sbrs	r24, 0
+ 6ba:	06 c0       	rjmp	.+12     	; 0x6c8 <__stack+0x269>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:360
+	{
+		switch (btn_prev)
+ 6bc:	37 30       	cpi	r19, 0x07	; 7
+ 6be:	09 f0       	breq	.+2      	; 0x6c2 <__stack+0x263>
+ 6c0:	6d c0       	rjmp	.+218    	; 0x79c <__stack+0x33d>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:364
+		{
+		case BTN1:
+			flags &=~(NORMAL_MODE);				//Выключаем нормальный режим
+			flags |=TEMPERATURE_SET_MODE;		//Включаем режим установки температуры
+ 6c2:	8e 7f       	andi	r24, 0xFE	; 254
+ 6c4:	82 60       	ori	r24, 0x02	; 2
+ 6c6:	66 c0       	rjmp	.+204    	; 0x794 <__stack+0x335>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:367
+			break;
+		}
+	}else if (flags&TEMPERATURE_SET_MODE)
+ 6c8:	81 ff       	sbrs	r24, 1
+ 6ca:	68 c0       	rjmp	.+208    	; 0x79c <__stack+0x33d>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:369
+	{
+		switch (btn_prev)
+ 6cc:	3b 30       	cpi	r19, 0x0B	; 11
+ 6ce:	09 f4       	brne	.+2      	; 0x6d2 <__stack+0x273>
+ 6d0:	3e c0       	rjmp	.+124    	; 0x74e <__stack+0x2ef>
+ 6d2:	18 f4       	brcc	.+6      	; 0x6da <__stack+0x27b>
+ 6d4:	37 30       	cpi	r19, 0x07	; 7
+ 6d6:	51 f0       	breq	.+20     	; 0x6ec <__stack+0x28d>
+ 6d8:	61 c0       	rjmp	.+194    	; 0x79c <__stack+0x33d>
+ 6da:	3d 30       	cpi	r19, 0x0D	; 13
+ 6dc:	09 f4       	brne	.+2      	; 0x6e0 <__stack+0x281>
+ 6de:	4a c0       	rjmp	.+148    	; 0x774 <__stack+0x315>
+ 6e0:	3e 30       	cpi	r19, 0x0E	; 14
+ 6e2:	09 f0       	breq	.+2      	; 0x6e6 <__stack+0x287>
+ 6e4:	5b c0       	rjmp	.+182    	; 0x79c <__stack+0x33d>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:393
+			case BTN3:								//Кнопка -
+				if (sel_temp>=(MIN_TEMP+step))sel_temp-=step;
+				break;
+			case BTN4:								//Кнопка ESC (Выход без сохранения)
+				flags &=~(TEMPERATURE_SET_MODE);	//Выключаем режим выбора температуры
+				flags |=NORMAL_MODE;				//Включаем обычный режим
+ 6e6:	8d 7f       	andi	r24, 0xFD	; 253
+ 6e8:	81 60       	ori	r24, 0x01	; 1
+ 6ea:	54 c0       	rjmp	.+168    	; 0x794 <__stack+0x335>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:373
+	{
+		switch (btn_prev)
+		{
+			case BTN1:								//Кнопка Enter (Сохранение настройки)
+					flags &=~(TEMPERATURE_SET_MODE);	//Выключаем режим выбора температуры
+					flags |=NORMAL_MODE;				//Включаем обычный режим
+ 6ec:	8d 7f       	andi	r24, 0xFD	; 253
+ 6ee:	81 60       	ori	r24, 0x01	; 1
+ 6f0:	90 93 b2 00 	sts	0x00B2, r25	; 0x8000b2 <flags+0x1>
+ 6f4:	80 93 b1 00 	sts	0x00B1, r24	; 0x8000b1 <flags>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:374
+					set_temp = sel_temp;				//Задаем температуру для нагрева.
+ 6f8:	80 91 b3 00 	lds	r24, 0x00B3	; 0x8000b3 <sel_temp>
+ 6fc:	90 91 b4 00 	lds	r25, 0x00B4	; 0x8000b4 <sel_temp+0x1>
+ 700:	90 93 ac 00 	sts	0x00AC, r25	; 0x8000ac <set_temp+0x1>
+ 704:	80 93 ab 00 	sts	0x00AB, r24	; 0x8000ab <set_temp>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:375
+					ATOMIC_BLOCK(ATOMIC_RESTORESTATE){	//Записываем в EEPROM новую температуру
+ 708:	7f b6       	in	r7, 0x3f	; 63
 /usr/lib/avr/include/util/atomic.h:50
     return 1;
 }
@@ -989,20 +1346,31 @@ void set_default_temp(void){
 static __inline__ uint8_t __iCliRetVal(void)
 {
     cli();
- 50a:	f8 94       	cli
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:393
-							EEPROM_write(DEFAULT_TEMP_HBYTE, (unsigned char)(sel_temp>>8));
- 50c:	60 90 74 00 	lds	r6, 0x0074	; 0x800074 <sel_temp>
- 510:	60 91 75 00 	lds	r22, 0x0075	; 0x800075 <sel_temp+0x1>
- 514:	80 e0       	ldi	r24, 0x00	; 0
- 516:	90 e0       	ldi	r25, 0x00	; 0
- 518:	0e 94 49 00 	call	0x92	; 0x92 <EEPROM_write>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:394
-							EEPROM_write(DEFAULT_TEMP_LBYTE,(unsigned char)sel_temp);
- 51c:	66 2d       	mov	r22, r6
- 51e:	81 e0       	ldi	r24, 0x01	; 1
- 520:	90 e0       	ldi	r25, 0x00	; 0
- 522:	0e 94 49 00 	call	0x92	; 0x92 <EEPROM_write>
+ 70a:	f8 94       	cli
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:376
+						int16_t eeprom_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Читаем температуру из EEPROM
+ 70c:	80 e0       	ldi	r24, 0x00	; 0
+ 70e:	90 e0       	ldi	r25, 0x00	; 0
+ 710:	0e 94 49 00 	call	0x92	; 0x92 <EEPROM_read>
+ 714:	a8 2e       	mov	r10, r24
+ 716:	b1 2c       	mov	r11, r1
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:377
+						eeprom_temp <<=8;
+ 718:	ba 2c       	mov	r11, r10
+ 71a:	aa 24       	eor	r10, r10
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:378
+						eeprom_temp |=EEPROM_read(DEFAULT_TEMP_LBYTE);		
+ 71c:	81 e0       	ldi	r24, 0x01	; 1
+ 71e:	90 e0       	ldi	r25, 0x00	; 0
+ 720:	0e 94 49 00 	call	0x92	; 0x92 <EEPROM_read>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:379
+						if (eeprom_temp!=sel_temp){		//Если значение установленной температуры отличается от того, что есть в EEPROM - перезаписываем.
+ 724:	80 90 b3 00 	lds	r8, 0x00B3	; 0x8000b3 <sel_temp>
+ 728:	90 90 b4 00 	lds	r9, 0x00B4	; 0x8000b4 <sel_temp+0x1>
+ 72c:	a8 2a       	or	r10, r24
+ 72e:	a8 14       	cp	r10, r8
+ 730:	b9 04       	cpc	r11, r9
+ 732:	11 f4       	brne	.+4      	; 0x738 <__stack+0x2d9>
 /usr/lib/avr/include/util/atomic.h:70
     (void)__s;
 }
@@ -1010,961 +1378,349 @@ static __inline__ uint8_t __iCliRetVal(void)
 static __inline__ void __iRestore(const  uint8_t *__s)
 {
     SREG = *__s;
- 526:	7f be       	out	0x3f, r7	; 63
+ 734:	7f be       	out	0x3f, r7	; 63
 /usr/lib/avr/include/util/atomic.h:71
     __asm__ volatile ("" ::: "memory");
- 528:	7f c0       	rjmp	.+254    	; 0x628 <__stack+0x1c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:390
-			}else {
-				longPress=0;
-			}
-			if (longPress==1) {
-				btnStatus = (PINB&BTN_MASK);
-				switch (btnStatus){
- 52a:	8d 30       	cpi	r24, 0x0D	; 13
- 52c:	c1 f0       	breq	.+48     	; 0x55e <__stack+0xff>
- 52e:	8e 30       	cpi	r24, 0x0E	; 14
- 530:	09 f5       	brne	.+66     	; 0x574 <__stack+0x115>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:407
-							sel_temp--;
-						}else{
-							sel_temp = 0;
-						}
-						break;
-					case BTN4:menuNum/=10;return; break;
- 532:	80 91 b6 00 	lds	r24, 0x00B6	; 0x8000b6 <menuNum>
- 536:	90 91 b7 00 	lds	r25, 0x00B7	; 0x8000b7 <menuNum+0x1>
- 53a:	63 c0       	rjmp	.+198    	; 0x602 <__stack+0x1a3>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:397
-						ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+ 736:	32 c0       	rjmp	.+100    	; 0x79c <__stack+0x33d>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:380
 							EEPROM_write(DEFAULT_TEMP_HBYTE, (unsigned char)(sel_temp>>8));
-							EEPROM_write(DEFAULT_TEMP_LBYTE,(unsigned char)sel_temp);
+ 738:	69 2d       	mov	r22, r9
+ 73a:	80 e0       	ldi	r24, 0x00	; 0
+ 73c:	90 e0       	ldi	r25, 0x00	; 0
+ 73e:	0e 94 50 00 	call	0xa0	; 0xa0 <EEPROM_write>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:381
+							EEPROM_write(DEFAULT_TEMP_LBYTE,(unsigned char)sel_temp);	
+ 742:	68 2d       	mov	r22, r8
+ 744:	81 e0       	ldi	r24, 0x01	; 1
+ 746:	90 e0       	ldi	r25, 0x00	; 0
+ 748:	0e 94 50 00 	call	0xa0	; 0xa0 <EEPROM_write>
+ 74c:	f3 cf       	rjmp	.-26     	; 0x734 <__stack+0x2d5>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:386
 						}
-						return;break;
-					case BTN2:sel_temp++;
- 53c:	80 91 74 00 	lds	r24, 0x0074	; 0x800074 <sel_temp>
- 540:	90 91 75 00 	lds	r25, 0x0075	; 0x800075 <sel_temp+0x1>
- 544:	01 96       	adiw	r24, 0x01	; 1
- 546:	90 93 75 00 	sts	0x0075, r25	; 0x800075 <sel_temp+0x1>
- 54a:	80 93 74 00 	sts	0x0074, r24	; 0x800074 <sel_temp>
+					}
+				break;
+			case BTN2:								//Кнопка +
+				if (sel_temp<=MAX_TEMP-step)sel_temp+=step;
+ 74e:	40 91 b3 00 	lds	r20, 0x00B3	; 0x8000b3 <sel_temp>
+ 752:	50 91 b4 00 	lds	r21, 0x00B4	; 0x8000b4 <sel_temp+0x1>
+ 756:	82 2f       	mov	r24, r18
+ 758:	90 e0       	ldi	r25, 0x00	; 0
+ 75a:	98 01       	movw	r18, r16
+ 75c:	28 1b       	sub	r18, r24
+ 75e:	39 0b       	sbc	r19, r25
+ 760:	24 17       	cp	r18, r20
+ 762:	35 07       	cpc	r19, r21
+ 764:	d8 f0       	brcs	.+54     	; 0x79c <__stack+0x33d>
+ 766:	84 0f       	add	r24, r20
+ 768:	95 1f       	adc	r25, r21
+ 76a:	90 93 b4 00 	sts	0x00B4, r25	; 0x8000b4 <sel_temp+0x1>
+ 76e:	80 93 b3 00 	sts	0x00B3, r24	; 0x8000b3 <sel_temp>
+ 772:	14 c0       	rjmp	.+40     	; 0x79c <__stack+0x33d>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:389
+				break;
+			case BTN3:								//Кнопка -
+				if (sel_temp>=(MIN_TEMP+step))sel_temp-=step;
+ 774:	82 2f       	mov	r24, r18
+ 776:	90 e0       	ldi	r25, 0x00	; 0
+ 778:	20 91 b3 00 	lds	r18, 0x00B3	; 0x8000b3 <sel_temp>
+ 77c:	30 91 b4 00 	lds	r19, 0x00B4	; 0x8000b4 <sel_temp+0x1>
+ 780:	28 17       	cp	r18, r24
+ 782:	39 07       	cpc	r19, r25
+ 784:	58 f0       	brcs	.+22     	; 0x79c <__stack+0x33d>
+ 786:	28 1b       	sub	r18, r24
+ 788:	39 0b       	sbc	r19, r25
+ 78a:	30 93 b4 00 	sts	0x00B4, r19	; 0x8000b4 <sel_temp+0x1>
+ 78e:	20 93 b3 00 	sts	0x00B3, r18	; 0x8000b3 <sel_temp>
+ 792:	04 c0       	rjmp	.+8      	; 0x79c <__stack+0x33d>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:393
+				break;
+			case BTN4:								//Кнопка ESC (Выход без сохранения)
+				flags &=~(TEMPERATURE_SET_MODE);	//Выключаем режим выбора температуры
+				flags |=NORMAL_MODE;				//Включаем обычный режим
+ 794:	90 93 b2 00 	sts	0x00B2, r25	; 0x8000b2 <flags+0x1>
+ 798:	80 93 b1 00 	sts	0x00B1, r24	; 0x8000b1 <flags>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:398
-						if (sel_temp>=1000)sel_temp=(999);	//Если достигли максимума.
- 54e:	88 3e       	cpi	r24, 0xE8	; 232
- 550:	93 40       	sbci	r25, 0x03	; 3
- 552:	80 f0       	brcs	.+32     	; 0x574 <__stack+0x115>
- 554:	d0 92 75 00 	sts	0x0075, r13	; 0x800075 <sel_temp+0x1>
- 558:	c0 92 74 00 	sts	0x0074, r12	; 0x800074 <sel_temp>
- 55c:	0b c0       	rjmp	.+22     	; 0x574 <__stack+0x115>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:401
-						break;
-					case BTN3:
-						if (sel_temp>=1){	//Если есть куда уменьшать
- 55e:	80 91 74 00 	lds	r24, 0x0074	; 0x800074 <sel_temp>
- 562:	90 91 75 00 	lds	r25, 0x0075	; 0x800075 <sel_temp+0x1>
- 566:	00 97       	sbiw	r24, 0x00	; 0
- 568:	29 f0       	breq	.+10     	; 0x574 <__stack+0x115>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:402
-							sel_temp--;
- 56a:	01 97       	sbiw	r24, 0x01	; 1
- 56c:	90 93 75 00 	sts	0x0075, r25	; 0x800075 <sel_temp+0x1>
- 570:	80 93 74 00 	sts	0x0074, r24	; 0x800074 <sel_temp>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:410
-						}
-						break;
-					case BTN4:menuNum/=10;return; break;
-				}
-			}
-			timerManager[2]=0;
- 574:	10 92 68 00 	sts	0x0068, r1	; 0x800068 <__DATA_REGION_ORIGIN__+0x8>
- 578:	10 92 69 00 	sts	0x0069, r1	; 0x800069 <__DATA_REGION_ORIGIN__+0x9>
- 57c:	10 92 6a 00 	sts	0x006A, r1	; 0x80006a <__DATA_REGION_ORIGIN__+0xa>
- 580:	10 92 6b 00 	sts	0x006B, r1	; 0x80006b <__DATA_REGION_ORIGIN__+0xb>
- 584:	81 cf       	rjmp	.-254    	; 0x488 <__stack+0x29>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:143
-				case 2:memccpy(screen,MOD,0,3);break;
-				case 3:memccpy(screen,PID,0,3);break;
-				case 4:memccpy(screen,HYS,0,3);break;
-				case 5:memccpy(screen,CAL,0,3);break;
-				case 10:set_default_temp();break;//Выбор температуры по-умолчанию
-				case 20:memccpy(screen,PID,0,3);break;
- 586:	23 e0       	ldi	r18, 0x03	; 3
- 588:	30 e0       	ldi	r19, 0x00	; 0
- 58a:	40 e0       	ldi	r20, 0x00	; 0
- 58c:	50 e0       	ldi	r21, 0x00	; 0
- 58e:	61 ea       	ldi	r22, 0xA1	; 161
- 590:	70 e0       	ldi	r23, 0x00	; 0
- 592:	2e c0       	rjmp	.+92     	; 0x5f0 <__stack+0x191>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:144
-				case 21:memccpy(screen,HYS,0,3);break;
- 594:	23 e0       	ldi	r18, 0x03	; 3
- 596:	30 e0       	ldi	r19, 0x00	; 0
- 598:	40 e0       	ldi	r20, 0x00	; 0
- 59a:	50 e0       	ldi	r21, 0x00	; 0
- 59c:	6e e9       	ldi	r22, 0x9E	; 158
- 59e:	70 e0       	ldi	r23, 0x00	; 0
- 5a0:	27 c0       	rjmp	.+78     	; 0x5f0 <__stack+0x191>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:145
-				case 22:memccpy(screen,REL,0,3);break;
- 5a2:	23 e0       	ldi	r18, 0x03	; 3
- 5a4:	30 e0       	ldi	r19, 0x00	; 0
- 5a6:	40 e0       	ldi	r20, 0x00	; 0
- 5a8:	50 e0       	ldi	r21, 0x00	; 0
- 5aa:	68 e9       	ldi	r22, 0x98	; 152
- 5ac:	70 e0       	ldi	r23, 0x00	; 0
- 5ae:	20 c0       	rjmp	.+64     	; 0x5f0 <__stack+0x191>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:147
-				case 30:memccpy(screen,SET,0,3);break;
-				case 31:memccpy(screen,CAL,0,3);break;
- 5b0:	23 e0       	ldi	r18, 0x03	; 3
- 5b2:	30 e0       	ldi	r19, 0x00	; 0
- 5b4:	40 e0       	ldi	r20, 0x00	; 0
- 5b6:	50 e0       	ldi	r21, 0x00	; 0
- 5b8:	6b e9       	ldi	r22, 0x9B	; 155
- 5ba:	70 e0       	ldi	r23, 0x00	; 0
- 5bc:	19 c0       	rjmp	.+50     	; 0x5f0 <__stack+0x191>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:148
-				case 40:memccpy(screen,MAX,0,3);break;
- 5be:	23 e0       	ldi	r18, 0x03	; 3
- 5c0:	30 e0       	ldi	r19, 0x00	; 0
- 5c2:	40 e0       	ldi	r20, 0x00	; 0
- 5c4:	50 e0       	ldi	r21, 0x00	; 0
- 5c6:	62 e9       	ldi	r22, 0x92	; 146
- 5c8:	70 e0       	ldi	r23, 0x00	; 0
- 5ca:	12 c0       	rjmp	.+36     	; 0x5f0 <__stack+0x191>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:150
-				case 41:memccpy(screen,MIN,0,3);break;
-				case 50:convert_temp(0);break;
- 5cc:	80 e0       	ldi	r24, 0x00	; 0
- 5ce:	90 e0       	ldi	r25, 0x00	; 0
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:151
-				case 51:convert_temp(500);break;
- 5d0:	0e 94 80 00 	call	0x100	; 0x100 <convert_temp>
- 5d4:	29 c0       	rjmp	.+82     	; 0x628 <__stack+0x1c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:152
-				case 300:memccpy(screen,PID_P,0,3);break;
- 5d6:	23 e0       	ldi	r18, 0x03	; 3
- 5d8:	30 e0       	ldi	r19, 0x00	; 0
- 5da:	40 e0       	ldi	r20, 0x00	; 0
- 5dc:	50 e0       	ldi	r21, 0x00	; 0
- 5de:	6c e8       	ldi	r22, 0x8C	; 140
- 5e0:	70 e0       	ldi	r23, 0x00	; 0
- 5e2:	06 c0       	rjmp	.+12     	; 0x5f0 <__stack+0x191>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:153
-				case 301:memccpy(screen,PID_I,0,3);break;
- 5e4:	23 e0       	ldi	r18, 0x03	; 3
- 5e6:	30 e0       	ldi	r19, 0x00	; 0
- 5e8:	40 e0       	ldi	r20, 0x00	; 0
- 5ea:	50 e0       	ldi	r21, 0x00	; 0
- 5ec:	69 e8       	ldi	r22, 0x89	; 137
- 5ee:	70 e0       	ldi	r23, 0x00	; 0
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:154
-				case 302:memccpy(screen,PID_D,0,3);break;
- 5f0:	86 e7       	ldi	r24, 0x76	; 118
- 5f2:	90 e0       	ldi	r25, 0x00	; 0
- 5f4:	0e 94 35 05 	call	0xa6a	; 0xa6a <memccpy>
- 5f8:	17 c0       	rjmp	.+46     	; 0x628 <__stack+0x1c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:156
-				default:
-					if(lastAct==1)menuNum/=10;
- 5fa:	20 91 b5 00 	lds	r18, 0x00B5	; 0x8000b5 <lastAct>
- 5fe:	21 30       	cpi	r18, 0x01	; 1
- 600:	41 f4       	brne	.+16     	; 0x612 <__stack+0x1b3>
- 602:	b8 01       	movw	r22, r16
- 604:	0e 94 43 05 	call	0xa86	; 0xa86 <__udivmodhi4>
- 608:	70 93 b7 00 	sts	0x00B7, r23	; 0x8000b7 <menuNum+0x1>
- 60c:	60 93 b6 00 	sts	0x00B6, r22	; 0x8000b6 <menuNum>
- 610:	0b c0       	rjmp	.+22     	; 0x628 <__stack+0x1c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:157
-					if(lastAct==2)menuNum--;
- 612:	22 30       	cpi	r18, 0x02	; 2
- 614:	11 f4       	brne	.+4      	; 0x61a <__stack+0x1bb>
- 616:	01 97       	sbiw	r24, 0x01	; 1
- 618:	03 c0       	rjmp	.+6      	; 0x620 <__stack+0x1c1>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:158
-					if(lastAct==3)menuNum++;
- 61a:	23 30       	cpi	r18, 0x03	; 3
- 61c:	29 f4       	brne	.+10     	; 0x628 <__stack+0x1c9>
- 61e:	01 96       	adiw	r24, 0x01	; 1
- 620:	90 93 b7 00 	sts	0x00B7, r25	; 0x8000b7 <menuNum+0x1>
- 624:	80 93 b6 00 	sts	0x00B6, r24	; 0x8000b6 <menuNum>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:161
-			}
-			//convert_temp(menuNum);
-			PORTA ^= (1<<7);	//Индикация инженерного меню. Моргаем точками разрядов.
- 628:	8b b3       	in	r24, 0x1b	; 27
- 62a:	80 58       	subi	r24, 0x80	; 128
- 62c:	8b bb       	out	0x1b, r24	; 27
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:162
-			timerManager[1]=0;
- 62e:	10 92 64 00 	sts	0x0064, r1	; 0x800064 <__DATA_REGION_ORIGIN__+0x4>
- 632:	10 92 65 00 	sts	0x0065, r1	; 0x800065 <__DATA_REGION_ORIGIN__+0x5>
- 636:	10 92 66 00 	sts	0x0066, r1	; 0x800066 <__DATA_REGION_ORIGIN__+0x6>
- 63a:	10 92 67 00 	sts	0x0067, r1	; 0x800067 <__DATA_REGION_ORIGIN__+0x7>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:165
+			default:
+				break;
 		}
-		
-		if(timerManager[2]>=BUTTONS_READ_DELAY){
- 63e:	80 91 68 00 	lds	r24, 0x0068	; 0x800068 <__DATA_REGION_ORIGIN__+0x8>
- 642:	90 91 69 00 	lds	r25, 0x0069	; 0x800069 <__DATA_REGION_ORIGIN__+0x9>
- 646:	a0 91 6a 00 	lds	r26, 0x006A	; 0x80006a <__DATA_REGION_ORIGIN__+0xa>
- 64a:	b0 91 6b 00 	lds	r27, 0x006B	; 0x80006b <__DATA_REGION_ORIGIN__+0xb>
- 64e:	c2 97       	sbiw	r24, 0x32	; 50
- 650:	a1 05       	cpc	r26, r1
- 652:	b1 05       	cpc	r27, r1
- 654:	08 f4       	brcc	.+2      	; 0x658 <__stack+0x1f9>
- 656:	48 ce       	rjmp	.-880    	; 0x2e8 <main+0x13c>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:167
-			static uint8_t btnStatus;
-			if (btnStatus!=(PINB&BTN_MASK)) {
- 658:	86 b3       	in	r24, 0x16	; 22
- 65a:	8f 70       	andi	r24, 0x0F	; 15
- 65c:	90 91 b4 00 	lds	r25, 0x00B4	; 0x8000b4 <btnStatus.2175>
- 660:	89 13       	cpse	r24, r25
- 662:	08 c0       	rjmp	.+16     	; 0x674 <__stack+0x215>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:180
-				while ((PINB&BTN_MASK)!=BTN_MASK){
-					PORTA=0x00;
-				}	//Пока кнопку не отпустят - стопорим дальнейшее выполнение.
-			}
-
-			if (menuNum<=0 && lastAct==4){ //Продолжаем загрузку в нормальном режиме.
- 664:	80 91 b6 00 	lds	r24, 0x00B6	; 0x8000b6 <menuNum>
- 668:	90 91 b7 00 	lds	r25, 0x00B7	; 0x8000b7 <menuNum+0x1>
- 66c:	89 2b       	or	r24, r25
- 66e:	09 f4       	brne	.+2      	; 0x672 <__stack+0x213>
- 670:	4a c0       	rjmp	.+148    	; 0x706 <__stack+0x2a7>
- 672:	54 c0       	rjmp	.+168    	; 0x71c <__stack+0x2bd>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:168
-		}
-		
-		if(timerManager[2]>=BUTTONS_READ_DELAY){
-			static uint8_t btnStatus;
-			if (btnStatus!=(PINB&BTN_MASK)) {
-				btnStatus = (PINB&BTN_MASK);
- 674:	86 b3       	in	r24, 0x16	; 22
- 676:	8f 70       	andi	r24, 0x0F	; 15
- 678:	80 93 b4 00 	sts	0x00B4, r24	; 0x8000b4 <btnStatus.2175>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:169
-				switch (btnStatus){
- 67c:	8b 30       	cpi	r24, 0x0B	; 11
- 67e:	29 f1       	breq	.+74     	; 0x6ca <__stack+0x26b>
- 680:	90 f4       	brcc	.+36     	; 0x6a6 <__stack+0x247>
- 682:	87 30       	cpi	r24, 0x07	; 7
- 684:	c9 f5       	brne	.+114    	; 0x6f8 <__stack+0x299>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:170
-					case BTN1:menuNum*=10;lastAct=1;break;
- 686:	20 91 b6 00 	lds	r18, 0x00B6	; 0x8000b6 <menuNum>
- 68a:	30 91 b7 00 	lds	r19, 0x00B7	; 0x8000b7 <menuNum+0x1>
- 68e:	82 9e       	mul	r8, r18
- 690:	c0 01       	movw	r24, r0
- 692:	83 9e       	mul	r8, r19
- 694:	90 0d       	add	r25, r0
- 696:	11 24       	eor	r1, r1
- 698:	90 93 b7 00 	sts	0x00B7, r25	; 0x8000b7 <menuNum+0x1>
- 69c:	80 93 b6 00 	sts	0x00B6, r24	; 0x8000b6 <menuNum>
- 6a0:	f0 92 b5 00 	sts	0x00B5, r15	; 0x8000b5 <lastAct>
- 6a4:	29 c0       	rjmp	.+82     	; 0x6f8 <__stack+0x299>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:169
-		
-		if(timerManager[2]>=BUTTONS_READ_DELAY){
-			static uint8_t btnStatus;
-			if (btnStatus!=(PINB&BTN_MASK)) {
-				btnStatus = (PINB&BTN_MASK);
-				switch (btnStatus){
- 6a6:	8d 30       	cpi	r24, 0x0D	; 13
- 6a8:	e1 f0       	breq	.+56     	; 0x6e2 <__stack+0x283>
- 6aa:	8e 30       	cpi	r24, 0x0E	; 14
- 6ac:	29 f5       	brne	.+74     	; 0x6f8 <__stack+0x299>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:173
-					case BTN1:menuNum*=10;lastAct=1;break;
-					case BTN2:menuNum++;lastAct=2; break;
-					case BTN3:menuNum--;lastAct=3; break;
-					case BTN4:menuNum/=10;lastAct=4; break;
- 6ae:	80 91 b6 00 	lds	r24, 0x00B6	; 0x8000b6 <menuNum>
- 6b2:	90 91 b7 00 	lds	r25, 0x00B7	; 0x8000b7 <menuNum+0x1>
- 6b6:	b8 01       	movw	r22, r16
- 6b8:	0e 94 43 05 	call	0xa86	; 0xa86 <__udivmodhi4>
- 6bc:	70 93 b7 00 	sts	0x00B7, r23	; 0x8000b7 <menuNum+0x1>
- 6c0:	60 93 b6 00 	sts	0x00B6, r22	; 0x8000b6 <menuNum>
- 6c4:	90 92 b5 00 	sts	0x00B5, r9	; 0x8000b5 <lastAct>
- 6c8:	17 c0       	rjmp	.+46     	; 0x6f8 <__stack+0x299>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:171
-			static uint8_t btnStatus;
-			if (btnStatus!=(PINB&BTN_MASK)) {
-				btnStatus = (PINB&BTN_MASK);
-				switch (btnStatus){
-					case BTN1:menuNum*=10;lastAct=1;break;
-					case BTN2:menuNum++;lastAct=2; break;
- 6ca:	80 91 b6 00 	lds	r24, 0x00B6	; 0x8000b6 <menuNum>
- 6ce:	90 91 b7 00 	lds	r25, 0x00B7	; 0x8000b7 <menuNum+0x1>
- 6d2:	01 96       	adiw	r24, 0x01	; 1
- 6d4:	90 93 b7 00 	sts	0x00B7, r25	; 0x8000b7 <menuNum+0x1>
- 6d8:	80 93 b6 00 	sts	0x00B6, r24	; 0x8000b6 <menuNum>
- 6dc:	b0 92 b5 00 	sts	0x00B5, r11	; 0x8000b5 <lastAct>
- 6e0:	0b c0       	rjmp	.+22     	; 0x6f8 <__stack+0x299>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:172
-					case BTN3:menuNum--;lastAct=3; break;
- 6e2:	80 91 b6 00 	lds	r24, 0x00B6	; 0x8000b6 <menuNum>
- 6e6:	90 91 b7 00 	lds	r25, 0x00B7	; 0x8000b7 <menuNum+0x1>
- 6ea:	01 97       	sbiw	r24, 0x01	; 1
- 6ec:	90 93 b7 00 	sts	0x00B7, r25	; 0x8000b7 <menuNum+0x1>
- 6f0:	80 93 b6 00 	sts	0x00B6, r24	; 0x8000b6 <menuNum>
- 6f4:	a0 92 b5 00 	sts	0x00B5, r10	; 0x8000b5 <lastAct>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:175
-					case BTN4:menuNum/=10;lastAct=4; break;
-				}
-				while ((PINB&BTN_MASK)!=BTN_MASK){
- 6f8:	86 b3       	in	r24, 0x16	; 22
- 6fa:	8f 70       	andi	r24, 0x0F	; 15
- 6fc:	8f 30       	cpi	r24, 0x0F	; 15
- 6fe:	09 f4       	brne	.+2      	; 0x702 <__stack+0x2a3>
- 700:	b1 cf       	rjmp	.-158    	; 0x664 <__stack+0x205>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:176
-					PORTA=0x00;
- 702:	1b ba       	out	0x1b, r1	; 27
- 704:	f9 cf       	rjmp	.-14     	; 0x6f8 <__stack+0x299>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:180
-				}	//Пока кнопку не отпустят - стопорим дальнейшее выполнение.
-			}
-
-			if (menuNum<=0 && lastAct==4){ //Продолжаем загрузку в нормальном режиме.
- 706:	80 91 b5 00 	lds	r24, 0x00B5	; 0x8000b5 <lastAct>
- 70a:	84 30       	cpi	r24, 0x04	; 4
- 70c:	39 f4       	brne	.+14     	; 0x71c <__stack+0x2bd>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:181
-				flags=NORMAL_MODE;
- 70e:	81 e0       	ldi	r24, 0x01	; 1
- 710:	90 e0       	ldi	r25, 0x00	; 0
- 712:	90 93 b9 00 	sts	0x00B9, r25	; 0x8000b9 <flags+0x1>
- 716:	80 93 b8 00 	sts	0x00B8, r24	; 0x8000b8 <flags>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:182
-				PORTA &= ~(1<<7);
- 71a:	df 98       	cbi	0x1b, 7	; 27
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:184
-			}
-			timerManager[2]=0;
- 71c:	10 92 68 00 	sts	0x0068, r1	; 0x800068 <__DATA_REGION_ORIGIN__+0x8>
- 720:	10 92 69 00 	sts	0x0069, r1	; 0x800069 <__DATA_REGION_ORIGIN__+0x9>
- 724:	10 92 6a 00 	sts	0x006A, r1	; 0x80006a <__DATA_REGION_ORIGIN__+0xa>
- 728:	10 92 6b 00 	sts	0x006B, r1	; 0x80006b <__DATA_REGION_ORIGIN__+0xb>
- 72c:	dd cd       	rjmp	.-1094   	; 0x2e8 <main+0x13c>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:303
-				sel_temp+=10;
-				if ((sel_temp%100)<10) sel_temp-=100;
-				break;
-			case BTN2:
-				sel_temp+=1;
-				if((sel_temp%10)==0) sel_temp-=10;
- 72e:	0a e0       	ldi	r16, 0x0A	; 10
- 730:	10 e0       	ldi	r17, 0x00	; 0
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:299
-				sel_temp+=100;
-				if (sel_temp>=1000) sel_temp%=1000;
-				break;
-			case BTN3:
-				sel_temp+=10;
-				if ((sel_temp%100)<10) sel_temp-=100;
- 732:	e4 e6       	ldi	r30, 0x64	; 100
- 734:	ee 2e       	mov	r14, r30
- 736:	f1 2c       	mov	r15, r1
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:295
 	}
-	}else if(flags&TEMPERATURE_SET_MODE){
-		switch (btn_state){
-			case BTN4:
-				sel_temp+=100;
-				if (sel_temp>=1000) sel_temp%=1000;
- 738:	f8 ee       	ldi	r31, 0xE8	; 232
- 73a:	cf 2e       	mov	r12, r31
- 73c:	f3 e0       	ldi	r31, 0x03	; 3
- 73e:	df 2e       	mov	r13, r31
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:325
-	if ((raw_data>>2)&1) {
-		flags |= OPEN_THERMOCOUPLE;
-		curr_temp = 0;
-	}else{
-		flags &= ~(OPEN_THERMOCOUPLE);
-		filtered_data= (((filtered_data*(FILTER_FACTOR-1))+(raw_data>>3))/FILTER_FACTOR); //Усредняем
- 740:	a5 e0       	ldi	r26, 0x05	; 5
- 742:	9a 2e       	mov	r9, r26
- 744:	b6 e0       	ldi	r27, 0x06	; 6
- 746:	ab 2e       	mov	r10, r27
- 748:	b1 2c       	mov	r11, r1
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:191
-	}
-//------------------------------------------------------------------
-    while (1) 
-    {
-//------------------------------------------------------------------
-		if (timerManager[0]>=SCREEN_UPDATE_DELAY){
- 74a:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
- 74e:	90 91 61 00 	lds	r25, 0x0061	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
- 752:	a0 91 62 00 	lds	r26, 0x0062	; 0x800062 <__DATA_REGION_ORIGIN__+0x2>
- 756:	b0 91 63 00 	lds	r27, 0x0063	; 0x800063 <__DATA_REGION_ORIGIN__+0x3>
- 75a:	05 97       	sbiw	r24, 0x05	; 5
- 75c:	a1 05       	cpc	r26, r1
- 75e:	b1 05       	cpc	r27, r1
- 760:	50 f0       	brcs	.+20     	; 0x776 <__stack+0x317>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:192
-			prnt();
- 762:	0e 94 51 00 	call	0xa2	; 0xa2 <prnt>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:193
-			timerManager[0]=0;
- 766:	10 92 60 00 	sts	0x0060, r1	; 0x800060 <__DATA_REGION_ORIGIN__>
- 76a:	10 92 61 00 	sts	0x0061, r1	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
- 76e:	10 92 62 00 	sts	0x0062, r1	; 0x800062 <__DATA_REGION_ORIGIN__+0x2>
- 772:	10 92 63 00 	sts	0x0063, r1	; 0x800063 <__DATA_REGION_ORIGIN__+0x3>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:196
-		}
-//------------------------------------------------------------------
-		if (timerManager[1]>=POINT_FLASH_DELAY){
- 776:	80 91 64 00 	lds	r24, 0x0064	; 0x800064 <__DATA_REGION_ORIGIN__+0x4>
- 77a:	90 91 65 00 	lds	r25, 0x0065	; 0x800065 <__DATA_REGION_ORIGIN__+0x5>
- 77e:	a0 91 66 00 	lds	r26, 0x0066	; 0x800066 <__DATA_REGION_ORIGIN__+0x6>
- 782:	b0 91 67 00 	lds	r27, 0x0067	; 0x800067 <__DATA_REGION_ORIGIN__+0x7>
- 786:	c2 97       	sbiw	r24, 0x32	; 50
- 788:	a1 05       	cpc	r26, r1
- 78a:	b1 05       	cpc	r27, r1
- 78c:	30 f1       	brcs	.+76     	; 0x7da <__stack+0x37b>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:197
-			if (set_temp){
- 78e:	80 91 b2 00 	lds	r24, 0x00B2	; 0x8000b2 <set_temp>
- 792:	90 91 b3 00 	lds	r25, 0x00B3	; 0x8000b3 <set_temp+0x1>
- 796:	00 97       	sbiw	r24, 0x00	; 0
- 798:	c1 f0       	breq	.+48     	; 0x7ca <__stack+0x36b>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:198
-				if (curr_temp>(set_temp+HYSTERESIS_MAX)){
- 79a:	03 96       	adiw	r24, 0x03	; 3
- 79c:	20 91 b0 00 	lds	r18, 0x00B0	; 0x8000b0 <curr_temp>
- 7a0:	30 91 b1 00 	lds	r19, 0x00B1	; 0x8000b1 <curr_temp+0x1>
- 7a4:	82 17       	cp	r24, r18
- 7a6:	93 07       	cpc	r25, r19
- 7a8:	10 f4       	brcc	.+4      	; 0x7ae <__stack+0x34f>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:199
-					PORTA &= ~(1<<7);
- 7aa:	df 98       	cbi	0x1b, 7	; 27
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:200
-					PORTC &= ~(1<<3);
- 7ac:	ab 98       	cbi	0x15, 3	; 21
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:202
-				}
-				if (curr_temp<(set_temp-HYSTERESIS_MIN)){
- 7ae:	80 91 b2 00 	lds	r24, 0x00B2	; 0x8000b2 <set_temp>
- 7b2:	90 91 b3 00 	lds	r25, 0x00B3	; 0x8000b3 <set_temp+0x1>
- 7b6:	03 97       	sbiw	r24, 0x03	; 3
- 7b8:	20 91 b0 00 	lds	r18, 0x00B0	; 0x8000b0 <curr_temp>
- 7bc:	30 91 b1 00 	lds	r19, 0x00B1	; 0x8000b1 <curr_temp+0x1>
- 7c0:	28 17       	cp	r18, r24
- 7c2:	39 07       	cpc	r19, r25
- 7c4:	10 f4       	brcc	.+4      	; 0x7ca <__stack+0x36b>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:203
-					PORTA |= (1<<7);
- 7c6:	df 9a       	sbi	0x1b, 7	; 27
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:204
-					PORTC |= (1<<3);
- 7c8:	ab 9a       	sbi	0x15, 3	; 21
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:207
-				}
-			}
-			timerManager[1]=0;
- 7ca:	10 92 64 00 	sts	0x0064, r1	; 0x800064 <__DATA_REGION_ORIGIN__+0x4>
- 7ce:	10 92 65 00 	sts	0x0065, r1	; 0x800065 <__DATA_REGION_ORIGIN__+0x5>
- 7d2:	10 92 66 00 	sts	0x0066, r1	; 0x800066 <__DATA_REGION_ORIGIN__+0x6>
- 7d6:	10 92 67 00 	sts	0x0067, r1	; 0x800067 <__DATA_REGION_ORIGIN__+0x7>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:210
-		}
-//------------------------------------------------------------------
-		if(timerManager[2]>=BUTTONS_READ_DELAY){
- 7da:	80 91 68 00 	lds	r24, 0x0068	; 0x800068 <__DATA_REGION_ORIGIN__+0x8>
- 7de:	90 91 69 00 	lds	r25, 0x0069	; 0x800069 <__DATA_REGION_ORIGIN__+0x9>
- 7e2:	a0 91 6a 00 	lds	r26, 0x006A	; 0x80006a <__DATA_REGION_ORIGIN__+0xa>
- 7e6:	b0 91 6b 00 	lds	r27, 0x006B	; 0x80006b <__DATA_REGION_ORIGIN__+0xb>
- 7ea:	c2 97       	sbiw	r24, 0x32	; 50
- 7ec:	a1 05       	cpc	r26, r1
- 7ee:	b1 05       	cpc	r27, r1
- 7f0:	08 f4       	brcc	.+2      	; 0x7f4 <__stack+0x395>
- 7f2:	a2 c0       	rjmp	.+324    	; 0x938 <__stack+0x4d9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:267
-void btnsread(void){
-	
-	static uint16_t idle;
-	static uint8_t btn_state;
-	
-	if (btn_state==(PINB&BTN_MASK)){
- 7f4:	90 91 ad 00 	lds	r25, 0x00AD	; 0x8000ad <btn_state.2208>
- 7f8:	86 b3       	in	r24, 0x16	; 22
- 7fa:	8f 70       	andi	r24, 0x0F	; 15
- 7fc:	98 13       	cpse	r25, r24
- 7fe:	25 c0       	rjmp	.+74     	; 0x84a <__stack+0x3eb>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:268
-		if(btn_state==BTN_MASK) {						//���� ������ �� ������
- 800:	9f 30       	cpi	r25, 0x0F	; 15
- 802:	09 f0       	breq	.+2      	; 0x806 <__stack+0x3a7>
- 804:	91 c0       	rjmp	.+290    	; 0x928 <__stack+0x4c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:269
-			if (flags&TEMPERATURE_SET_MODE){			//� �� � ������ ��������� �����������
- 806:	80 91 b8 00 	lds	r24, 0x00B8	; 0x8000b8 <flags>
- 80a:	90 91 b9 00 	lds	r25, 0x00B9	; 0x8000b9 <flags+0x1>
- 80e:	81 ff       	sbrs	r24, 1
- 810:	8b c0       	rjmp	.+278    	; 0x928 <__stack+0x4c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:270
-				idle++;									//����������� �������
- 812:	20 91 ab 00 	lds	r18, 0x00AB	; 0x8000ab <idle.2207>
- 816:	30 91 ac 00 	lds	r19, 0x00AC	; 0x8000ac <idle.2207+0x1>
- 81a:	2f 5f       	subi	r18, 0xFF	; 255
- 81c:	3f 4f       	sbci	r19, 0xFF	; 255
- 81e:	30 93 ac 00 	sts	0x00AC, r19	; 0x8000ac <idle.2207+0x1>
- 822:	20 93 ab 00 	sts	0x00AB, r18	; 0x8000ab <idle.2207>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:271
-				if (idle>IDLE_DELAY){					//���� �� ���������� - 
- 826:	25 36       	cpi	r18, 0x65	; 101
- 828:	31 05       	cpc	r19, r1
- 82a:	08 f4       	brcc	.+2      	; 0x82e <__stack+0x3cf>
- 82c:	7d c0       	rjmp	.+250    	; 0x928 <__stack+0x4c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:273
-					flags &=~(TEMPERATURE_SET_MODE);	//��������� ����� ��������� �����������
-					flags |=NORMAL_MODE;				//� ��������� � ������� �����
- 82e:	8d 7f       	andi	r24, 0xFD	; 253
- 830:	81 60       	ori	r24, 0x01	; 1
- 832:	90 93 b9 00 	sts	0x00B9, r25	; 0x8000b9 <flags+0x1>
- 836:	80 93 b8 00 	sts	0x00B8, r24	; 0x8000b8 <flags>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:274
-					if (set_temp)sel_temp=set_temp;					//��� ���� ��������� ����������� �� ����������.
- 83a:	80 91 b2 00 	lds	r24, 0x00B2	; 0x8000b2 <set_temp>
- 83e:	90 91 b3 00 	lds	r25, 0x00B3	; 0x8000b3 <set_temp+0x1>
- 842:	00 97       	sbiw	r24, 0x00	; 0
- 844:	09 f4       	brne	.+2      	; 0x848 <__stack+0x3e9>
- 846:	70 c0       	rjmp	.+224    	; 0x928 <__stack+0x4c9>
- 848:	44 c0       	rjmp	.+136    	; 0x8d2 <__stack+0x473>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:280
-				}
-			}
-		}
-		return;
-	} else{
-		btn_state = PINB&BTN_MASK;
- 84a:	26 b3       	in	r18, 0x16	; 22
- 84c:	2f 70       	andi	r18, 0x0F	; 15
- 84e:	20 93 ad 00 	sts	0x00AD, r18	; 0x8000ad <btn_state.2208>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:281
-		idle=0;											//������ ����� ������ - ���������� ������� �������
- 852:	10 92 ac 00 	sts	0x00AC, r1	; 0x8000ac <idle.2207+0x1>
- 856:	10 92 ab 00 	sts	0x00AB, r1	; 0x8000ab <idle.2207>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:284
-	}
-	
-	if (flags&NORMAL_MODE){
- 85a:	80 91 b8 00 	lds	r24, 0x00B8	; 0x8000b8 <flags>
- 85e:	90 91 b9 00 	lds	r25, 0x00B9	; 0x8000b9 <flags+0x1>
- 862:	80 ff       	sbrs	r24, 0
- 864:	0a c0       	rjmp	.+20     	; 0x87a <__stack+0x41b>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:285
-		switch (btn_state){
- 866:	27 30       	cpi	r18, 0x07	; 7
- 868:	09 f0       	breq	.+2      	; 0x86c <__stack+0x40d>
- 86a:	5e c0       	rjmp	.+188    	; 0x928 <__stack+0x4c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:288
-			case BTN1:
-				flags &=~(NORMAL_MODE);			//��������� ������� �����
-				flags |=TEMPERATURE_SET_MODE;	//��������� � ����� ��������� �����������
- 86c:	8e 7f       	andi	r24, 0xFE	; 254
- 86e:	82 60       	ori	r24, 0x02	; 2
- 870:	90 93 b9 00 	sts	0x00B9, r25	; 0x8000b9 <flags+0x1>
- 874:	80 93 b8 00 	sts	0x00B8, r24	; 0x8000b8 <flags>
- 878:	57 c0       	rjmp	.+174    	; 0x928 <__stack+0x4c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:291
-				break;
-	}
-	}else if(flags&TEMPERATURE_SET_MODE){
- 87a:	81 ff       	sbrs	r24, 1
- 87c:	55 c0       	rjmp	.+170    	; 0x928 <__stack+0x4c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:292
-		switch (btn_state){
- 87e:	2b 30       	cpi	r18, 0x0B	; 11
- 880:	e1 f1       	breq	.+120    	; 0x8fa <__stack+0x49b>
- 882:	b0 f4       	brcc	.+44     	; 0x8b0 <__stack+0x451>
- 884:	27 30       	cpi	r18, 0x07	; 7
- 886:	09 f0       	breq	.+2      	; 0x88a <__stack+0x42b>
- 888:	4f c0       	rjmp	.+158    	; 0x928 <__stack+0x4c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:307
-				sel_temp+=1;
-				if((sel_temp%10)==0) sel_temp-=10;
-				break;
-			case BTN1:
-				flags &=~(TEMPERATURE_SET_MODE);	//��������� ����� ��������� �����������
-				flags |=NORMAL_MODE;				//��������� � ������� �����
- 88a:	8d 7f       	andi	r24, 0xFD	; 253
- 88c:	81 60       	ori	r24, 0x01	; 1
- 88e:	90 93 b9 00 	sts	0x00B9, r25	; 0x8000b9 <flags+0x1>
- 892:	80 93 b8 00 	sts	0x00B8, r24	; 0x8000b8 <flags>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:308
-				set_temp = sel_temp<<2;
- 896:	80 91 74 00 	lds	r24, 0x0074	; 0x800074 <sel_temp>
- 89a:	90 91 75 00 	lds	r25, 0x0075	; 0x800075 <sel_temp+0x1>
- 89e:	88 0f       	add	r24, r24
- 8a0:	99 1f       	adc	r25, r25
- 8a2:	88 0f       	add	r24, r24
- 8a4:	99 1f       	adc	r25, r25
- 8a6:	90 93 b3 00 	sts	0x00B3, r25	; 0x8000b3 <set_temp+0x1>
- 8aa:	80 93 b2 00 	sts	0x00B2, r24	; 0x8000b2 <set_temp>
- 8ae:	3c c0       	rjmp	.+120    	; 0x928 <__stack+0x4c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:292
-				flags &=~(NORMAL_MODE);			//��������� ������� �����
-				flags |=TEMPERATURE_SET_MODE;	//��������� � ����� ��������� �����������
-				break;
-	}
-	}else if(flags&TEMPERATURE_SET_MODE){
-		switch (btn_state){
- 8b0:	2d 30       	cpi	r18, 0x0D	; 13
- 8b2:	a1 f0       	breq	.+40     	; 0x8dc <__stack+0x47d>
- 8b4:	2e 30       	cpi	r18, 0x0E	; 14
- 8b6:	c1 f5       	brne	.+112    	; 0x928 <__stack+0x4c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:294
-			case BTN4:
-				sel_temp+=100;
- 8b8:	80 91 74 00 	lds	r24, 0x0074	; 0x800074 <sel_temp>
- 8bc:	90 91 75 00 	lds	r25, 0x0075	; 0x800075 <sel_temp+0x1>
- 8c0:	8c 59       	subi	r24, 0x9C	; 156
- 8c2:	9f 4f       	sbci	r25, 0xFF	; 255
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:295
-				if (sel_temp>=1000) sel_temp%=1000;
- 8c4:	88 3e       	cpi	r24, 0xE8	; 232
- 8c6:	f3 e0       	ldi	r31, 0x03	; 3
- 8c8:	9f 07       	cpc	r25, r31
- 8ca:	18 f0       	brcs	.+6      	; 0x8d2 <__stack+0x473>
- 8cc:	b6 01       	movw	r22, r12
- 8ce:	0e 94 43 05 	call	0xa86	; 0xa86 <__udivmodhi4>
- 8d2:	90 93 75 00 	sts	0x0075, r25	; 0x800075 <sel_temp+0x1>
- 8d6:	80 93 74 00 	sts	0x0074, r24	; 0x800074 <sel_temp>
- 8da:	26 c0       	rjmp	.+76     	; 0x928 <__stack+0x4c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:298
-				break;
-			case BTN3:
-				sel_temp+=10;
- 8dc:	20 91 74 00 	lds	r18, 0x0074	; 0x800074 <sel_temp>
- 8e0:	30 91 75 00 	lds	r19, 0x0075	; 0x800075 <sel_temp+0x1>
- 8e4:	f9 01       	movw	r30, r18
- 8e6:	3a 96       	adiw	r30, 0x0a	; 10
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:299
-				if ((sel_temp%100)<10) sel_temp-=100;
- 8e8:	cf 01       	movw	r24, r30
- 8ea:	b7 01       	movw	r22, r14
- 8ec:	0e 94 43 05 	call	0xa86	; 0xa86 <__udivmodhi4>
- 8f0:	0a 97       	sbiw	r24, 0x0a	; 10
- 8f2:	78 f4       	brcc	.+30     	; 0x912 <__stack+0x4b3>
- 8f4:	2a 55       	subi	r18, 0x5A	; 90
- 8f6:	31 09       	sbc	r19, r1
- 8f8:	13 c0       	rjmp	.+38     	; 0x920 <__stack+0x4c1>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:302
-				break;
-			case BTN2:
-				sel_temp+=1;
- 8fa:	20 91 74 00 	lds	r18, 0x0074	; 0x800074 <sel_temp>
- 8fe:	30 91 75 00 	lds	r19, 0x0075	; 0x800075 <sel_temp+0x1>
- 902:	f9 01       	movw	r30, r18
- 904:	31 96       	adiw	r30, 0x01	; 1
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:303
-				if((sel_temp%10)==0) sel_temp-=10;
- 906:	cf 01       	movw	r24, r30
- 908:	b8 01       	movw	r22, r16
- 90a:	0e 94 43 05 	call	0xa86	; 0xa86 <__udivmodhi4>
- 90e:	89 2b       	or	r24, r25
- 910:	29 f0       	breq	.+10     	; 0x91c <__stack+0x4bd>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:302
-			case BTN3:
-				sel_temp+=10;
-				if ((sel_temp%100)<10) sel_temp-=100;
-				break;
-			case BTN2:
-				sel_temp+=1;
- 912:	f0 93 75 00 	sts	0x0075, r31	; 0x800075 <sel_temp+0x1>
- 916:	e0 93 74 00 	sts	0x0074, r30	; 0x800074 <sel_temp>
- 91a:	06 c0       	rjmp	.+12     	; 0x928 <__stack+0x4c9>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:303
-				if((sel_temp%10)==0) sel_temp-=10;
- 91c:	29 50       	subi	r18, 0x09	; 9
- 91e:	31 09       	sbc	r19, r1
- 920:	30 93 75 00 	sts	0x0075, r19	; 0x800075 <sel_temp+0x1>
- 924:	20 93 74 00 	sts	0x0074, r18	; 0x800074 <sel_temp>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:212
+	btn_prev = btn_curr;
+ 79c:	d0 92 60 00 	sts	0x0060, r13	; 0x800060 <__DATA_REGION_ORIGIN__>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:213
 			timerManager[1]=0;
 		}
 //------------------------------------------------------------------
 		if(timerManager[2]>=BUTTONS_READ_DELAY){
 			btnsread();
 			timerManager[2]=0;
- 928:	10 92 68 00 	sts	0x0068, r1	; 0x800068 <__DATA_REGION_ORIGIN__+0x8>
- 92c:	10 92 69 00 	sts	0x0069, r1	; 0x800069 <__DATA_REGION_ORIGIN__+0x9>
- 930:	10 92 6a 00 	sts	0x006A, r1	; 0x80006a <__DATA_REGION_ORIGIN__+0xa>
- 934:	10 92 6b 00 	sts	0x006B, r1	; 0x80006b <__DATA_REGION_ORIGIN__+0xb>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:215
+ 7a0:	10 92 69 00 	sts	0x0069, r1	; 0x800069 <timerManager+0x8>
+ 7a4:	10 92 6a 00 	sts	0x006A, r1	; 0x80006a <timerManager+0x9>
+ 7a8:	10 92 6b 00 	sts	0x006B, r1	; 0x80006b <timerManager+0xa>
+ 7ac:	10 92 6c 00 	sts	0x006C, r1	; 0x80006c <timerManager+0xb>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:216
 		}
 //------------------------------------------------------------------		
 		if (timerManager[3]>=SCREEN_BLINK_DELAY){
- 938:	80 91 6c 00 	lds	r24, 0x006C	; 0x80006c <__DATA_REGION_ORIGIN__+0xc>
- 93c:	90 91 6d 00 	lds	r25, 0x006D	; 0x80006d <__DATA_REGION_ORIGIN__+0xd>
- 940:	a0 91 6e 00 	lds	r26, 0x006E	; 0x80006e <__DATA_REGION_ORIGIN__+0xe>
- 944:	b0 91 6f 00 	lds	r27, 0x006F	; 0x80006f <__DATA_REGION_ORIGIN__+0xf>
- 948:	84 3f       	cpi	r24, 0xF4	; 244
- 94a:	91 40       	sbci	r25, 0x01	; 1
- 94c:	a1 05       	cpc	r26, r1
- 94e:	b1 05       	cpc	r27, r1
- 950:	68 f1       	brcs	.+90     	; 0x9ac <__stack+0x54d>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:216
-			if (flags&TEMPERATURE_SET_MODE)	{
- 952:	80 91 b8 00 	lds	r24, 0x00B8	; 0x8000b8 <flags>
- 956:	90 91 b9 00 	lds	r25, 0x00B9	; 0x8000b9 <flags+0x1>
- 95a:	81 ff       	sbrs	r24, 1
- 95c:	14 c0       	rjmp	.+40     	; 0x986 <__stack+0x527>
+ 7b0:	80 91 6d 00 	lds	r24, 0x006D	; 0x80006d <timerManager+0xc>
+ 7b4:	90 91 6e 00 	lds	r25, 0x006E	; 0x80006e <timerManager+0xd>
+ 7b8:	a0 91 6f 00 	lds	r26, 0x006F	; 0x80006f <timerManager+0xe>
+ 7bc:	b0 91 70 00 	lds	r27, 0x0070	; 0x800070 <timerManager+0xf>
+ 7c0:	88 3c       	cpi	r24, 0xC8	; 200
+ 7c2:	91 05       	cpc	r25, r1
+ 7c4:	a1 05       	cpc	r26, r1
+ 7c6:	b1 05       	cpc	r27, r1
+ 7c8:	68 f1       	brcs	.+90     	; 0x824 <__stack+0x3c5>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:217
-				flags ^= SCREEN_OFF_STATE;
- 95e:	31 e0       	ldi	r19, 0x01	; 1
- 960:	93 27       	eor	r25, r19
- 962:	90 93 b9 00 	sts	0x00B9, r25	; 0x8000b9 <flags+0x1>
- 966:	80 93 b8 00 	sts	0x00B8, r24	; 0x8000b8 <flags>
+			if (flags&TEMPERATURE_SET_MODE)	{
+ 7ca:	80 91 b1 00 	lds	r24, 0x00B1	; 0x8000b1 <flags>
+ 7ce:	90 91 b2 00 	lds	r25, 0x00B2	; 0x8000b2 <flags+0x1>
+ 7d2:	81 ff       	sbrs	r24, 1
+ 7d4:	14 c0       	rjmp	.+40     	; 0x7fe <__stack+0x39f>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:218
-				if (flags&SCREEN_OFF_STATE){
- 96a:	90 ff       	sbrs	r25, 0
- 96c:	07 c0       	rjmp	.+14     	; 0x97c <__stack+0x51d>
+				flags ^= SCREEN_OFF_STATE;
+ 7d6:	21 e0       	ldi	r18, 0x01	; 1
+ 7d8:	92 27       	eor	r25, r18
+ 7da:	90 93 b2 00 	sts	0x00B2, r25	; 0x8000b2 <flags+0x1>
+ 7de:	80 93 b1 00 	sts	0x00B1, r24	; 0x8000b1 <flags>
 /home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:219
+				if (flags&SCREEN_OFF_STATE){
+ 7e2:	90 ff       	sbrs	r25, 0
+ 7e4:	07 c0       	rjmp	.+14     	; 0x7f4 <__stack+0x395>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:220
 					screen[0]=0x00;screen[1]=0x00;screen[2]=0x00;
- 96e:	10 92 76 00 	sts	0x0076, r1	; 0x800076 <screen>
- 972:	10 92 77 00 	sts	0x0077, r1	; 0x800077 <screen+0x1>
- 976:	10 92 78 00 	sts	0x0078, r1	; 0x800078 <screen+0x2>
- 97a:	10 c0       	rjmp	.+32     	; 0x99c <__stack+0x53d>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:221
+ 7e6:	10 92 75 00 	sts	0x0075, r1	; 0x800075 <screen>
+ 7ea:	10 92 76 00 	sts	0x0076, r1	; 0x800076 <screen+0x1>
+ 7ee:	10 92 77 00 	sts	0x0077, r1	; 0x800077 <screen+0x2>
+ 7f2:	10 c0       	rjmp	.+32     	; 0x814 <__stack+0x3b5>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:222
 					}else{
 					convert_temp(sel_temp);
- 97c:	80 91 74 00 	lds	r24, 0x0074	; 0x800074 <sel_temp>
- 980:	90 91 75 00 	lds	r25, 0x0075	; 0x800075 <sel_temp+0x1>
- 984:	09 c0       	rjmp	.+18     	; 0x998 <__stack+0x539>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:224
+ 7f4:	80 91 b3 00 	lds	r24, 0x00B3	; 0x8000b3 <sel_temp>
+ 7f8:	90 91 b4 00 	lds	r25, 0x00B4	; 0x8000b4 <sel_temp+0x1>
+ 7fc:	09 c0       	rjmp	.+18     	; 0x810 <__stack+0x3b1>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:225
 				}
 				}else {
 				flags &= ~(SCREEN_OFF_STATE);
- 986:	9e 7f       	andi	r25, 0xFE	; 254
- 988:	90 93 b9 00 	sts	0x00B9, r25	; 0x8000b9 <flags+0x1>
- 98c:	80 93 b8 00 	sts	0x00B8, r24	; 0x8000b8 <flags>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:225
+ 7fe:	9e 7f       	andi	r25, 0xFE	; 254
+ 800:	90 93 b2 00 	sts	0x00B2, r25	; 0x8000b2 <flags+0x1>
+ 804:	80 93 b1 00 	sts	0x00B1, r24	; 0x8000b1 <flags>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:226
 				convert_temp(curr_temp);
- 990:	80 91 b0 00 	lds	r24, 0x00B0	; 0x8000b0 <curr_temp>
- 994:	90 91 b1 00 	lds	r25, 0x00B1	; 0x8000b1 <curr_temp+0x1>
- 998:	0e 94 80 00 	call	0x100	; 0x100 <convert_temp>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:227
+ 808:	80 91 a9 00 	lds	r24, 0x00A9	; 0x8000a9 <curr_temp>
+ 80c:	90 91 aa 00 	lds	r25, 0x00AA	; 0x8000aa <curr_temp+0x1>
+ 810:	0e 94 87 00 	call	0x10e	; 0x10e <convert_temp>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:228
 			}
 			timerManager[3]=0;
- 99c:	10 92 6c 00 	sts	0x006C, r1	; 0x80006c <__DATA_REGION_ORIGIN__+0xc>
- 9a0:	10 92 6d 00 	sts	0x006D, r1	; 0x80006d <__DATA_REGION_ORIGIN__+0xd>
- 9a4:	10 92 6e 00 	sts	0x006E, r1	; 0x80006e <__DATA_REGION_ORIGIN__+0xe>
- 9a8:	10 92 6f 00 	sts	0x006F, r1	; 0x80006f <__DATA_REGION_ORIGIN__+0xf>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:230
+ 814:	10 92 6d 00 	sts	0x006D, r1	; 0x80006d <timerManager+0xc>
+ 818:	10 92 6e 00 	sts	0x006E, r1	; 0x80006e <timerManager+0xd>
+ 81c:	10 92 6f 00 	sts	0x006F, r1	; 0x80006f <timerManager+0xe>
+ 820:	10 92 70 00 	sts	0x0070, r1	; 0x800070 <timerManager+0xf>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:231
 		}
 //------------------------------------------------------------------
 		if (timerManager[4]>=TEMP_READ_DELAY){
- 9ac:	80 91 70 00 	lds	r24, 0x0070	; 0x800070 <__DATA_REGION_ORIGIN__+0x10>
- 9b0:	90 91 71 00 	lds	r25, 0x0071	; 0x800071 <__DATA_REGION_ORIGIN__+0x11>
- 9b4:	a0 91 72 00 	lds	r26, 0x0072	; 0x800072 <__DATA_REGION_ORIGIN__+0x12>
- 9b8:	b0 91 73 00 	lds	r27, 0x0073	; 0x800073 <__DATA_REGION_ORIGIN__+0x13>
- 9bc:	8a 3f       	cpi	r24, 0xFA	; 250
- 9be:	91 05       	cpc	r25, r1
- 9c0:	a1 05       	cpc	r26, r1
- 9c2:	b1 05       	cpc	r27, r1
- 9c4:	08 f4       	brcc	.+2      	; 0x9c8 <__stack+0x569>
- 9c6:	c1 ce       	rjmp	.-638    	; 0x74a <__stack+0x2eb>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:335
-void SPI_init(void){
-    DDR_SPI = (1<<DD_MOSI)|(1<<DD_SCK);
-    SPCR = (1<<SPE)|(1<<MSTR)|(0<<SPR0);
+ 824:	80 91 71 00 	lds	r24, 0x0071	; 0x800071 <timerManager+0x10>
+ 828:	90 91 72 00 	lds	r25, 0x0072	; 0x800072 <timerManager+0x11>
+ 82c:	a0 91 73 00 	lds	r26, 0x0073	; 0x800073 <timerManager+0x12>
+ 830:	b0 91 74 00 	lds	r27, 0x0074	; 0x800074 <timerManager+0x13>
+ 834:	8a 3f       	cpi	r24, 0xFA	; 250
+ 836:	91 05       	cpc	r25, r1
+ 838:	a1 05       	cpc	r26, r1
+ 83a:	b1 05       	cpc	r27, r1
+ 83c:	08 f4       	brcc	.+2      	; 0x840 <__stack+0x3e1>
+ 83e:	c8 ce       	rjmp	.-624    	; 0x5d0 <__stack+0x171>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:425
+	PORTD = (1<<0);						//Настройка пина SS. ХЗ зачем я его сделал отдельно от основного SPI.
+    SPCR = (1<<SPE)|(1<<MSTR)|(0<<SPR0);//Настройка регистра. Включить SPI, мастер, на частоте F_CPU/2
 }
+//Процедура возвращает два байта из микросхемы MAX6675
 int16_t max6675_read(void){
     volatile uint8_t raw_byte=0;      	//данные из SPDR.
- 9c8:	19 82       	std	Y+1, r1	; 0x01
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:337
+ 840:	19 82       	std	Y+1, r1	; 0x01
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:427
     uint16_t full_data=0;    			//Переменная для обоих байтов
 	PORTD &= ~(1<<0);					//Прижимаем SS. Начало приема.
- 9ca:	90 98       	cbi	0x12, 0	; 18
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:338
+ 842:	90 98       	cbi	0x12, 0	; 18
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:428
 	SPDR = 0x00;						//Отправляем 8 бит, в ответ прилетит 8 от слейва
- 9cc:	1f b8       	out	0x0f, r1	; 15
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:339
+ 844:	1f b8       	out	0x0f, r1	; 15
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:429
 	while(!(SPSR & (1<<SPIF)));			//Ждем окончания
- 9ce:	77 9b       	sbis	0x0e, 7	; 14
- 9d0:	fe cf       	rjmp	.-4      	; 0x9ce <__stack+0x56f>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:340
+ 846:	77 9b       	sbis	0x0e, 7	; 14
+ 848:	fe cf       	rjmp	.-4      	; 0x846 <__stack+0x3e7>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:430
 	raw_byte = SPDR;					//Считываем данные из регистра
- 9d2:	8f b1       	in	r24, 0x0f	; 15
- 9d4:	89 83       	std	Y+1, r24	; 0x01
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:341
+ 84a:	8f b1       	in	r24, 0x0f	; 15
+ 84c:	89 83       	std	Y+1, r24	; 0x01
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:431
 	full_data = raw_byte;				//Пишем старший байт
- 9d6:	29 81       	ldd	r18, Y+1	; 0x01
- 9d8:	30 e0       	ldi	r19, 0x00	; 0
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:342
+ 84e:	29 81       	ldd	r18, Y+1	; 0x01
+ 850:	30 e0       	ldi	r19, 0x00	; 0
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:432
 	full_data <<=8;						//Двигаем его влево
- 9da:	32 2f       	mov	r19, r18
- 9dc:	22 27       	eor	r18, r18
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:343
+ 852:	32 2f       	mov	r19, r18
+ 854:	22 27       	eor	r18, r18
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:433
 	SPDR = 0x00;						//Отправляем еще 8 бит
- 9de:	1f b8       	out	0x0f, r1	; 15
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:344
+ 856:	1f b8       	out	0x0f, r1	; 15
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:434
 	while(!(SPSR & (1<<SPIF)));			//Ждем окончания
- 9e0:	77 9b       	sbis	0x0e, 7	; 14
- 9e2:	fe cf       	rjmp	.-4      	; 0x9e0 <__stack+0x581>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:345
+ 858:	77 9b       	sbis	0x0e, 7	; 14
+ 85a:	fe cf       	rjmp	.-4      	; 0x858 <__stack+0x3f9>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:435
 	raw_byte = SPDR;					//Считываем данные из регистра
- 9e4:	8f b1       	in	r24, 0x0f	; 15
- 9e6:	89 83       	std	Y+1, r24	; 0x01
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:346
+ 85c:	8f b1       	in	r24, 0x0f	; 15
+ 85e:	89 83       	std	Y+1, r24	; 0x01
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:436
 	full_data |= raw_byte;				//Пишем младший байт.
- 9e8:	89 81       	ldd	r24, Y+1	; 0x01
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:347
+ 860:	89 81       	ldd	r24, Y+1	; 0x01
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:437
 	PORTD |= (1<<0);					//Отпускаем SS. Конец приема.
- 9ea:	90 9a       	sbi	0x12, 0	; 18
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:348
+ 862:	90 9a       	sbi	0x12, 0	; 18
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:438
     return full_data;    				//Возвращаем прочитанное значение.
- 9ec:	28 2b       	or	r18, r24
- 9ee:	80 91 b8 00 	lds	r24, 0x00B8	; 0x8000b8 <flags>
- 9f2:	90 91 b9 00 	lds	r25, 0x00B9	; 0x8000b9 <flags+0x1>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:320
-}
+ 864:	28 2b       	or	r18, r24
+ 866:	80 91 b1 00 	lds	r24, 0x00B1	; 0x8000b1 <flags>
+ 86a:	90 91 b2 00 	lds	r25, 0x00B2	; 0x8000b2 <flags+0x1>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:408
+
 void read_temp (void){
 	static int16_t filtered_data;
 	int16_t raw_data = max6675_read();
 	//Проверка на отключенную термопару.
 	if ((raw_data>>2)&1) {
- 9f6:	22 ff       	sbrs	r18, 2
- 9f8:	0a c0       	rjmp	.+20     	; 0xa0e <__stack+0x5af>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:321
+ 86e:	22 ff       	sbrs	r18, 2
+ 870:	0a c0       	rjmp	.+20     	; 0x886 <__stack+0x427>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:409
 		flags |= OPEN_THERMOCOUPLE;
- 9fa:	92 60       	ori	r25, 0x02	; 2
- 9fc:	90 93 b9 00 	sts	0x00B9, r25	; 0x8000b9 <flags+0x1>
- a00:	80 93 b8 00 	sts	0x00B8, r24	; 0x8000b8 <flags>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:322
+ 872:	92 60       	ori	r25, 0x02	; 2
+ 874:	90 93 b2 00 	sts	0x00B2, r25	; 0x8000b2 <flags+0x1>
+ 878:	80 93 b1 00 	sts	0x00B1, r24	; 0x8000b1 <flags>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:410
 		curr_temp = 0;
- a04:	10 92 b1 00 	sts	0x00B1, r1	; 0x8000b1 <curr_temp+0x1>
- a08:	10 92 b0 00 	sts	0x00B0, r1	; 0x8000b0 <curr_temp>
- a0c:	24 c0       	rjmp	.+72     	; 0xa56 <__stack+0x5f7>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:324
+ 87c:	10 92 aa 00 	sts	0x00AA, r1	; 0x8000aa <curr_temp+0x1>
+ 880:	10 92 a9 00 	sts	0x00A9, r1	; 0x8000a9 <curr_temp>
+ 884:	20 c0       	rjmp	.+64     	; 0x8c6 <__stack+0x467>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:412
 	}else{
 		flags &= ~(OPEN_THERMOCOUPLE);
- a0e:	9d 7f       	andi	r25, 0xFD	; 253
- a10:	90 93 b9 00 	sts	0x00B9, r25	; 0x8000b9 <flags+0x1>
- a14:	80 93 b8 00 	sts	0x00B8, r24	; 0x8000b8 <flags>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:325
+ 886:	9d 7f       	andi	r25, 0xFD	; 253
+ 888:	90 93 b2 00 	sts	0x00B2, r25	; 0x8000b2 <flags+0x1>
+ 88c:	80 93 b1 00 	sts	0x00B1, r24	; 0x8000b1 <flags>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:413
 		filtered_data= (((filtered_data*(FILTER_FACTOR-1))+(raw_data>>3))/FILTER_FACTOR); //Усредняем
- a18:	40 91 ae 00 	lds	r20, 0x00AE	; 0x8000ae <filtered_data.2219>
- a1c:	50 91 af 00 	lds	r21, 0x00AF	; 0x8000af <filtered_data.2219+0x1>
- a20:	94 9e       	mul	r9, r20
- a22:	c0 01       	movw	r24, r0
- a24:	95 9e       	mul	r9, r21
- a26:	90 0d       	add	r25, r0
- a28:	11 24       	eor	r1, r1
- a2a:	43 e0       	ldi	r20, 0x03	; 3
- a2c:	35 95       	asr	r19
- a2e:	27 95       	ror	r18
- a30:	4a 95       	dec	r20
- a32:	e1 f7       	brne	.-8      	; 0xa2c <__stack+0x5cd>
- a34:	82 0f       	add	r24, r18
- a36:	93 1f       	adc	r25, r19
- a38:	b5 01       	movw	r22, r10
- a3a:	0e 94 57 05 	call	0xaae	; 0xaae <__divmodhi4>
- a3e:	70 93 af 00 	sts	0x00AF, r23	; 0x8000af <filtered_data.2219+0x1>
- a42:	60 93 ae 00 	sts	0x00AE, r22	; 0x8000ae <filtered_data.2219>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:326
-		curr_temp=(filtered_data>>2);
- a46:	75 95       	asr	r23
- a48:	67 95       	ror	r22
- a4a:	75 95       	asr	r23
- a4c:	67 95       	ror	r22
- a4e:	70 93 b1 00 	sts	0x00B1, r23	; 0x8000b1 <curr_temp+0x1>
- a52:	60 93 b0 00 	sts	0x00B0, r22	; 0x8000b0 <curr_temp>
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:328
+ 890:	40 91 a7 00 	lds	r20, 0x00A7	; 0x8000a7 <filtered_data.2222>
+ 894:	50 91 a8 00 	lds	r21, 0x00A8	; 0x8000a8 <filtered_data.2222+0x1>
+ 898:	c4 9e       	mul	r12, r20
+ 89a:	c0 01       	movw	r24, r0
+ 89c:	c5 9e       	mul	r12, r21
+ 89e:	90 0d       	add	r25, r0
+ 8a0:	11 24       	eor	r1, r1
+ 8a2:	43 e0       	ldi	r20, 0x03	; 3
+ 8a4:	35 95       	asr	r19
+ 8a6:	27 95       	ror	r18
+ 8a8:	4a 95       	dec	r20
+ 8aa:	e1 f7       	brne	.-8      	; 0x8a4 <__stack+0x445>
+ 8ac:	82 0f       	add	r24, r18
+ 8ae:	93 1f       	adc	r25, r19
+ 8b0:	b7 01       	movw	r22, r14
+ 8b2:	0e 94 8f 04 	call	0x91e	; 0x91e <__divmodhi4>
+ 8b6:	70 93 a8 00 	sts	0x00A8, r23	; 0x8000a8 <filtered_data.2222+0x1>
+ 8ba:	60 93 a7 00 	sts	0x00A7, r22	; 0x8000a7 <filtered_data.2222>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:414
+		curr_temp=filtered_data;
+ 8be:	70 93 aa 00 	sts	0x00AA, r23	; 0x8000aa <curr_temp+0x1>
+ 8c2:	60 93 a9 00 	sts	0x00A9, r22	; 0x8000a9 <curr_temp>
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:416
 	}
 	PORTD |= 1<<0;	
- a56:	90 9a       	sbi	0x12, 0	; 18
-/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:232
+ 8c6:	90 9a       	sbi	0x12, 0	; 18
+/home/ogurezzz/Yandex.Disk/Coding/VSCodium/Thermocontroller/main.c:233
 			timerManager[3]=0;
 		}
 //------------------------------------------------------------------
 		if (timerManager[4]>=TEMP_READ_DELAY){
 			read_temp();
 			timerManager[4]=0;
- a58:	10 92 70 00 	sts	0x0070, r1	; 0x800070 <__DATA_REGION_ORIGIN__+0x10>
- a5c:	10 92 71 00 	sts	0x0071, r1	; 0x800071 <__DATA_REGION_ORIGIN__+0x11>
- a60:	10 92 72 00 	sts	0x0072, r1	; 0x800072 <__DATA_REGION_ORIGIN__+0x12>
- a64:	10 92 73 00 	sts	0x0073, r1	; 0x800073 <__DATA_REGION_ORIGIN__+0x13>
- a68:	70 ce       	rjmp	.-800    	; 0x74a <__stack+0x2eb>
+ 8c8:	10 92 71 00 	sts	0x0071, r1	; 0x800071 <timerManager+0x10>
+ 8cc:	10 92 72 00 	sts	0x0072, r1	; 0x800072 <timerManager+0x11>
+ 8d0:	10 92 73 00 	sts	0x0073, r1	; 0x800073 <timerManager+0x12>
+ 8d4:	10 92 74 00 	sts	0x0074, r1	; 0x800074 <timerManager+0x13>
+ 8d8:	7b ce       	rjmp	.-778    	; 0x5d0 <__stack+0x171>
 
-00000a6a <memccpy>:
- a6a:	fb 01       	movw	r30, r22
- a6c:	dc 01       	movw	r26, r24
- a6e:	21 50       	subi	r18, 0x01	; 1
- a70:	30 40       	sbci	r19, 0x00	; 0
- a72:	30 f0       	brcs	.+12     	; 0xa80 <memccpy+0x16>
- a74:	01 90       	ld	r0, Z+
- a76:	0d 92       	st	X+, r0
- a78:	04 16       	cp	r0, r20
- a7a:	c9 f7       	brne	.-14     	; 0xa6e <memccpy+0x4>
- a7c:	cd 01       	movw	r24, r26
- a7e:	08 95       	ret
- a80:	88 27       	eor	r24, r24
- a82:	99 27       	eor	r25, r25
- a84:	08 95       	ret
+000008da <memccpy>:
+ 8da:	fb 01       	movw	r30, r22
+ 8dc:	dc 01       	movw	r26, r24
+ 8de:	21 50       	subi	r18, 0x01	; 1
+ 8e0:	30 40       	sbci	r19, 0x00	; 0
+ 8e2:	30 f0       	brcs	.+12     	; 0x8f0 <memccpy+0x16>
+ 8e4:	01 90       	ld	r0, Z+
+ 8e6:	0d 92       	st	X+, r0
+ 8e8:	04 16       	cp	r0, r20
+ 8ea:	c9 f7       	brne	.-14     	; 0x8de <memccpy+0x4>
+ 8ec:	cd 01       	movw	r24, r26
+ 8ee:	08 95       	ret
+ 8f0:	88 27       	eor	r24, r24
+ 8f2:	99 27       	eor	r25, r25
+ 8f4:	08 95       	ret
 
-00000a86 <__udivmodhi4>:
- a86:	aa 1b       	sub	r26, r26
- a88:	bb 1b       	sub	r27, r27
- a8a:	51 e1       	ldi	r21, 0x11	; 17
- a8c:	07 c0       	rjmp	.+14     	; 0xa9c <__udivmodhi4_ep>
+000008f6 <__udivmodhi4>:
+ 8f6:	aa 1b       	sub	r26, r26
+ 8f8:	bb 1b       	sub	r27, r27
+ 8fa:	51 e1       	ldi	r21, 0x11	; 17
+ 8fc:	07 c0       	rjmp	.+14     	; 0x90c <__udivmodhi4_ep>
 
-00000a8e <__udivmodhi4_loop>:
- a8e:	aa 1f       	adc	r26, r26
- a90:	bb 1f       	adc	r27, r27
- a92:	a6 17       	cp	r26, r22
- a94:	b7 07       	cpc	r27, r23
- a96:	10 f0       	brcs	.+4      	; 0xa9c <__udivmodhi4_ep>
- a98:	a6 1b       	sub	r26, r22
- a9a:	b7 0b       	sbc	r27, r23
+000008fe <__udivmodhi4_loop>:
+ 8fe:	aa 1f       	adc	r26, r26
+ 900:	bb 1f       	adc	r27, r27
+ 902:	a6 17       	cp	r26, r22
+ 904:	b7 07       	cpc	r27, r23
+ 906:	10 f0       	brcs	.+4      	; 0x90c <__udivmodhi4_ep>
+ 908:	a6 1b       	sub	r26, r22
+ 90a:	b7 0b       	sbc	r27, r23
 
-00000a9c <__udivmodhi4_ep>:
- a9c:	88 1f       	adc	r24, r24
- a9e:	99 1f       	adc	r25, r25
- aa0:	5a 95       	dec	r21
- aa2:	a9 f7       	brne	.-22     	; 0xa8e <__udivmodhi4_loop>
- aa4:	80 95       	com	r24
- aa6:	90 95       	com	r25
- aa8:	bc 01       	movw	r22, r24
- aaa:	cd 01       	movw	r24, r26
- aac:	08 95       	ret
+0000090c <__udivmodhi4_ep>:
+ 90c:	88 1f       	adc	r24, r24
+ 90e:	99 1f       	adc	r25, r25
+ 910:	5a 95       	dec	r21
+ 912:	a9 f7       	brne	.-22     	; 0x8fe <__udivmodhi4_loop>
+ 914:	80 95       	com	r24
+ 916:	90 95       	com	r25
+ 918:	bc 01       	movw	r22, r24
+ 91a:	cd 01       	movw	r24, r26
+ 91c:	08 95       	ret
 
-00000aae <__divmodhi4>:
- aae:	97 fb       	bst	r25, 7
- ab0:	07 2e       	mov	r0, r23
- ab2:	16 f4       	brtc	.+4      	; 0xab8 <__divmodhi4+0xa>
- ab4:	00 94       	com	r0
- ab6:	07 d0       	rcall	.+14     	; 0xac6 <__divmodhi4_neg1>
- ab8:	77 fd       	sbrc	r23, 7
- aba:	09 d0       	rcall	.+18     	; 0xace <__divmodhi4_neg2>
- abc:	0e 94 43 05 	call	0xa86	; 0xa86 <__udivmodhi4>
- ac0:	07 fc       	sbrc	r0, 7
- ac2:	05 d0       	rcall	.+10     	; 0xace <__divmodhi4_neg2>
- ac4:	3e f4       	brtc	.+14     	; 0xad4 <__divmodhi4_exit>
+0000091e <__divmodhi4>:
+ 91e:	97 fb       	bst	r25, 7
+ 920:	07 2e       	mov	r0, r23
+ 922:	16 f4       	brtc	.+4      	; 0x928 <__divmodhi4+0xa>
+ 924:	00 94       	com	r0
+ 926:	07 d0       	rcall	.+14     	; 0x936 <__divmodhi4_neg1>
+ 928:	77 fd       	sbrc	r23, 7
+ 92a:	09 d0       	rcall	.+18     	; 0x93e <__divmodhi4_neg2>
+ 92c:	0e 94 7b 04 	call	0x8f6	; 0x8f6 <__udivmodhi4>
+ 930:	07 fc       	sbrc	r0, 7
+ 932:	05 d0       	rcall	.+10     	; 0x93e <__divmodhi4_neg2>
+ 934:	3e f4       	brtc	.+14     	; 0x944 <__divmodhi4_exit>
 
-00000ac6 <__divmodhi4_neg1>:
- ac6:	90 95       	com	r25
- ac8:	81 95       	neg	r24
- aca:	9f 4f       	sbci	r25, 0xFF	; 255
- acc:	08 95       	ret
+00000936 <__divmodhi4_neg1>:
+ 936:	90 95       	com	r25
+ 938:	81 95       	neg	r24
+ 93a:	9f 4f       	sbci	r25, 0xFF	; 255
+ 93c:	08 95       	ret
 
-00000ace <__divmodhi4_neg2>:
- ace:	70 95       	com	r23
- ad0:	61 95       	neg	r22
- ad2:	7f 4f       	sbci	r23, 0xFF	; 255
+0000093e <__divmodhi4_neg2>:
+ 93e:	70 95       	com	r23
+ 940:	61 95       	neg	r22
+ 942:	7f 4f       	sbci	r23, 0xFF	; 255
 
-00000ad4 <__divmodhi4_exit>:
- ad4:	08 95       	ret
+00000944 <__divmodhi4_exit>:
+ 944:	08 95       	ret
 
-00000ad6 <_exit>:
- ad6:	f8 94       	cli
+00000946 <_exit>:
+ 946:	f8 94       	cli
 
-00000ad8 <__stop_program>:
- ad8:	ff cf       	rjmp	.-2      	; 0xad8 <__stop_program>
+00000948 <__stop_program>:
+ 948:	ff cf       	rjmp	.-2      	; 0x948 <__stop_program>
