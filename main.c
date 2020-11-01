@@ -20,7 +20,7 @@ const uint8_t digit[10] = {0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f}; /
 const uint8_t Err[3] = {0x79,0x50,0x50};
 const uint8_t PID[3] = {0x73,0x06,0x5e};
 const uint8_t HYS[3] = {0x76,0x6e,0x6d};
-const uint8_t En[3] =  {0x79,0x54,0x00};
+const uint8_t En[3] =  {0x79,0x54,0x00};			//Надпись En
 const uint8_t OPN[3] = {0x3f,0x73,0x54};
 const uint8_t DEF[3] = {0x5e,0x79,0x71};
 const uint8_t MOD[3] = {0x15,0x5c,0x5e};
@@ -34,10 +34,10 @@ const uint8_t PID_I[3] = {0x08,0x06,0x08};
 const uint8_t PID_D[3] = {0x08,0x5e,0x08};	
 //Глобальные переменные
 uint8_t screen[3]={0x3f,0x3f,0x3f};					//Переменный массив содержит текущие показания дисплея.
-uint16_t temp_arr[FILTER_FACTOR];				//Массив измеренных температур (скорее всего заменим на расчет бегущего среднего)
+uint16_t temp_arr[FILTER_FACTOR];					//Массив измеренных температур (скорее всего заменим на расчет бегущего среднего)
 uint16_t flags;										//Флаги.
 uint16_t set_temp = 0;								//Текущая установленная температура
-uint16_t sel_temp = 500;							//Выбранная, но не установленная температура
+uint16_t sel_temp = 0;								//Выбранная, но не установленная температура
 uint16_t curr_temp = 0;								//Текущая измеренная температура
 uint16_t menuNum = 0;								//Номер текущего меню (Инженерный режим)
 uint8_t lastAct = 0;								//Хоранит значение предыдущего действия (для использования в пределах)
@@ -53,7 +53,7 @@ uint32_t timerManager[5] = {SCREEN_UPDATE_DELAY,
 void tick(void);			//Тик таймера. Настроен на 1мс по привычке.
 void prnt(void);			//Вывод на экранзначения из массива screen[]. 
 void btnsread(void);		//Чтение нажатых кнопочек.
-void heater_shift(void);	//������������ ��������� �����������
+//void heater_shift(void);	//
 void read_temp (void);		//Чтение текущей температуры из MAX6675
 void convert_temp(uint16_t temp);
 //void set_default_temp(void); //Установка температуры по умолчанию после загрузки (Инженерный режим)
@@ -73,7 +73,8 @@ void convert_temp(uint16_t temp){
 	if(flags&OPEN_THERMOCOUPLE){
 		memccpy(screen,OPN,0,3);
 		}else{
-		temp %=1000;
+		temp>>=2;
+		//temp %=1000;
 		screen[0] = digit[temp/100]; temp %= 100;
 		screen[1] = digit[temp/10]; temp %= 10;
 		screen[2] = digit[temp];
@@ -88,7 +89,7 @@ int main(void)
 	_delay_ms(20);			//Задержка на 20 мс. Просто дать всему включиться.
 	//Настройка портов
 	DDRA = 0xff;			//Выход на сегменты
-	DDRB = 0x00;			//Настройка кнопок на вход, SPI на выход
+	DDRB = 0x00;			//Настройка кнопок на вход
 	DDRC = 0x0f;			//����� �� ������ � SSR
 	DDRD = 0xff;			//��������� MAX6675
 	PORTA = 0xff;			//�������� ��� ����������
@@ -102,13 +103,14 @@ int main(void)
 	PORTC = 7;_delay_ms(1000);
 	PORTC = 0;//_delay_ms(1000);
 	PORTA = 0x7f;
-	PORTD = 0x01;			//Настройка пина SS.
+	
 	
 	//Вычитываем данные настроек из EEPROM
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
 		sel_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Температура по-умолчанию старший байт
 		sel_temp <<=8;
 		sel_temp |=EEPROM_read(DEFAULT_TEMP_LBYTE);		//Температура по-умолчанию младший байт
+		if(sel_temp>MAX_TEMP)sel_temp=MAX_TEMP/2;		//Защита от чистого EEPROM. С новья будет на середине диапазона.
 	}
 	
 	SPI_init();		//Инициализация аппаратного SPI
@@ -258,19 +260,20 @@ void prnt(void){
 				digit_num=0;	
 	}
 }
-void btnsread(void){
+/*void btnsread(void){
 	
 	static uint16_t idle;
 	static uint8_t btn_state;
 	
-	if (btn_state==(PINB&BTN_MASK)){
-		if(btn_state==BTN_MASK) {						//���� ������ �� ������
-			if (flags&TEMPERATURE_SET_MODE){			//� �� � ������ ��������� �����������
-				idle++;									//����������� �������
-				if (idle>IDLE_DELAY){					//���� �� ���������� - 
-					flags &=~(TEMPERATURE_SET_MODE);	//��������� ����� ��������� �����������
-					flags |=NORMAL_MODE;				//� ��������� � ������� �����
-					if (set_temp)sel_temp=set_temp;					//��� ���� ��������� ����������� �� ����������.
+	if (btn_state==(PINB&BTN_MASK))
+	{
+		if(btn_state==BTN_MASK) {						
+			if (flags&TEMPERATURE_SET_MODE){			
+				idle++;									
+				if (idle>IDLE_DELAY){					 
+					flags &=~(TEMPERATURE_SET_MODE);	
+					flags |=NORMAL_MODE;				
+					if (set_temp)sel_temp=set_temp;					
 				}
 			}
 		}
@@ -279,7 +282,6 @@ void btnsread(void){
 		btn_state = PINB&BTN_MASK;
 		idle=0;											//������ ����� ������ - ���������� ������� �������
 	}
-	
 	if (flags&NORMAL_MODE){
 		switch (btn_state){
 			case BTN1:
@@ -322,7 +324,83 @@ void btnsread(void){
 		
 	}
 
+}*/
+void btnsread(void)
+{
+
+	static uint8_t hold_timer;				//Количество циклов удержания
+	uint8_t step=4;							//Шаг приращения температуры с учетом сдвига влево (1<<2=4)
+	static uint8_t btn_prev = BTN_MASK;		//Предыдущие нажатые кнопки.
+	uint8_t btn_curr = PINB&BTN_MASK;		//Текущие нажатые кнопки.
+	
+	
+	if (btn_prev==BTN_MASK)					//Если на предыдущем шаге не было нажато кнопок
+	{
+		btn_prev = btn_curr;				//Записываем текущие показания
+		hold_timer = 0;						//Сбрасываем таймер
+		return;								//Выходим
+	}
+
+	if(btn_curr==btn_prev)					//Если показания не поменялись
+	{
+		hold_timer++;						//Приращиваем таймер пока не переполнится
+		if (hold_timer<HOLD_TIMER_MAX)		//Проверяем переполнение таймера
+		{
+			return;							//Не переполнился, выходим.
+		}else{
+			hold_timer = 0;					//Переполнился. Обнуляем.
+			step = 40;						//Увеличиваем шаг изменения.
+		}
+	}
+
+//Ниже идет отработка кнопок. Если программа сюда дошла, значит была нажата, а потом отпущена кнопка.
+//Кнопки работают по отпусканию, а не по нажатию. Это исключает вариации "Двойного" нажатия
+	if (flags&NORMAL_MODE)
+	{
+		switch (btn_prev)
+		{
+		case BTN1:
+			flags &=~(NORMAL_MODE);				//Выключаем нормальный режим
+			flags |=TEMPERATURE_SET_MODE;		//Включаем режим установки температуры
+			break;
+		}
+	}else if (flags&TEMPERATURE_SET_MODE)
+	{
+		switch (btn_prev)
+		{
+			case BTN1:								//Кнопка Enter (Сохранение настройки)
+					flags &=~(TEMPERATURE_SET_MODE);	//Выключаем режим выбора температуры
+					flags |=NORMAL_MODE;				//Включаем обычный режим
+					set_temp = sel_temp;				//Задаем температуру для нагрева.
+					ATOMIC_BLOCK(ATOMIC_RESTORESTATE){	//Записываем в EEPROM новую температуру
+						int16_t eeprom_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Читаем температуру из EEPROM
+						eeprom_temp <<=8;
+						eeprom_temp |=EEPROM_read(DEFAULT_TEMP_LBYTE);		
+						if (eeprom_temp!=sel_temp){		//Если значение установленной температуры отличается от того, что есть в EEPROM - перезаписываем.
+							EEPROM_write(DEFAULT_TEMP_HBYTE, (unsigned char)(sel_temp>>8));
+							EEPROM_write(DEFAULT_TEMP_LBYTE,(unsigned char)sel_temp);	
+						}
+					}
+				break;
+			case BTN2:								//Кнопка +
+				if (sel_temp<=MAX_TEMP-step)sel_temp+=step;
+				break;
+			case BTN3:								//Кнопка -
+				if (sel_temp>=(MIN_TEMP+step))sel_temp-=step;
+				break;
+			case BTN4:								//Кнопка ESC (Выход без сохранения)
+				flags &=~(TEMPERATURE_SET_MODE);	//Выключаем режим выбора температуры
+				flags |=NORMAL_MODE;				//Включаем обычный режим
+			default:
+				break;
+		}
+	}
+	btn_prev = btn_curr;
 }
+
+
+
+
 void read_temp (void){
 	static int16_t filtered_data;
 	int16_t raw_data = max6675_read();
@@ -333,14 +411,16 @@ void read_temp (void){
 	}else{
 		flags &= ~(OPEN_THERMOCOUPLE);
 		filtered_data= (((filtered_data*(FILTER_FACTOR-1))+(raw_data>>3))/FILTER_FACTOR); //Усредняем
-		curr_temp=(filtered_data>>2);
+		curr_temp=filtered_data;
 	}
 	PORTD |= 1<<0;	
 }
 void SPI_init(void){
-    DDR_SPI = (1<<DD_MOSI)|(1<<DD_SCK);
-    SPCR = (1<<SPE)|(1<<MSTR)|(0<<SPR0);
+    DDR_SPI = (1<<DD_MOSI)|(1<<DD_SCK);	//Настройка портов MOSI и SCK
+	PORTD = (1<<0);						//Настройка пина SS. ХЗ зачем я его сделал отдельно от основного SPI.
+    SPCR = (1<<SPE)|(1<<MSTR)|(0<<SPR0);//Настройка регистра. Включить SPI, мастер, на частоте F_CPU/2
 }
+//Процедура возвращает два байта из микросхемы MAX6675
 int16_t max6675_read(void){
     volatile uint8_t raw_byte=0;      	//данные из SPDR.
     uint16_t full_data=0;    			//Переменная для обоих байтов
@@ -357,69 +437,25 @@ int16_t max6675_read(void){
 	PORTD |= (1<<0);					//Отпускаем SS. Конец приема.
     return full_data;    				//Возвращаем прочитанное значение.
 }
-void EEPROM_write(unsigned int uiAddress, unsigned char ucData)
-{
-/* Wait for completion of previous write */
-while(EECR & (1<<EEWE))
-;
-/* Set up address and data registers */
-EEAR = uiAddress;
-EEDR = ucData;
-/* Write logical one to EEMWE */
-EECR |= (1<<EEMWE);
-/* Start eeprom write by setting EEWE */
-EECR |= (1<<EEWE);
+void EEPROM_write(unsigned int uiAddress, unsigned char ucData){
+	/* Wait for completion of previous write */
+	while(EECR & (1<<EEWE));
+	/* Set up address and data registers */
+	EEAR = uiAddress;
+	EEDR = ucData;
+	/* Write logical one to EEMWE */
+	EECR |= (1<<EEMWE);
+	/* Start eeprom write by setting EEWE */
+	EECR |= (1<<EEWE);
 }
-unsigned char EEPROM_read(unsigned int uiAddress)
-{
-/* Wait for completion of previous write */
-while(EECR & (1<<EEWE))
-;
-/* Set up address register */
-EEAR = uiAddress;
-/* Start eeprom read by writing EERE */
-EECR |= (1<<EERE);
-/* Return data from data register */
-return EEDR;
+unsigned char EEPROM_read(unsigned int uiAddress){
+	/* Wait for completion of previous write */
+	while(EECR & (1<<EEWE))
+	;
+	/* Set up address register */
+	EEAR = uiAddress;
+	/* Start eeprom read by writing EERE */
+	EECR |= (1<<EERE);
+	/* Return data from data register */
+	return EEDR;
 }
-//Функции меню
-void set_default_temp(void){
-	while(1){
-		if(timerManager[0]>=SCREEN_UPDATE_DELAY){prnt();timerManager[0]=0;}
-		if(timerManager[1]>100){convert_temp(sel_temp);PORTA ^= (1<<7);timerManager[1]=0;}
-		if(timerManager[2]>=BUTTONS_READ_DELAY){
-			static uint8_t btnStatus;
-			static uint8_t longPress;
-			if ((~PINB)&BTN_MASK && longPress<1){
-				longPress++;
-			}else {
-				longPress=0;
-			}
-			if (longPress==1) {
-				btnStatus = (PINB&BTN_MASK);
-				switch (btnStatus){
-					case BTN1:menuNum/=10;
-						ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-							EEPROM_write(DEFAULT_TEMP_HBYTE, (unsigned char)(sel_temp>>8));
-							EEPROM_write(DEFAULT_TEMP_LBYTE,(unsigned char)sel_temp);
-						}
-						return;break;
-					case BTN2:sel_temp++;
-						if (sel_temp>=1000)sel_temp=(999);	//Если достигли максимума.
-						break;
-					case BTN3:
-						if (sel_temp>=1){	//Если есть куда уменьшать
-							sel_temp--;
-						}else{
-							sel_temp = 0;
-						}
-						break;
-					case BTN4:menuNum/=10;return; break;
-				}
-			}
-			timerManager[2]=0;
-		}
-	}
-	
-}
-

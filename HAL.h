@@ -15,12 +15,17 @@
 #define BUTTONS_READ_DELAY 50
 #define BUTTONS_LONG_PRESS_DELAY 20
 #define POINT_FLASH_DELAY 50
-#define SCREEN_BLINK_DELAY 500
+#define SCREEN_BLINK_DELAY 200
 #define IDLE_DELAY 5000/BUTTONS_READ_DELAY
 #define TEMP_READ_DELAY 250
 
 #define HYSTERESIS_MAX 3
 #define HYSTERESIS_MIN 3
+
+#define MAX_TEMP 3996       //Максимальная температура * 4 (3996/4=999)
+#define MIN_TEMP 0
+
+#define HOLD_TIMER_MAX 20   //Таймер удержания кнопки (в тактак чтения BUTTONS_READ_DELAY)
 
 #define FILTER_FACTOR 6
 
@@ -54,7 +59,9 @@
 
 
 //EEPROM ADRESSES
-#define DEFAULT_TEMP_HBYTE      0x00
-#define DEFAULT_TEMP_LBYTE      0x01
+#define DEFAULT_TEMP_HBYTE          0x00
+#define DEFAULT_TEMP_LBYTE          0x01
+#define TEMPERATURE_CONTROL_MODE    0x02
+
 
 #endif /* HAL_H_ */
