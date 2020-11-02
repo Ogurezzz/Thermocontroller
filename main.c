@@ -74,9 +74,10 @@ void convert_temp(uint16_t temp){
 		memccpy(screen,OPN,0,3);
 		}else{
 		temp>>=2;
-		//temp %=1000;
 		screen[0] = digit[temp/100]; temp %= 100;
+		if (screen[0]==digit[0]) screen[0]=0x00;
 		screen[1] = digit[temp/10]; temp %= 10;
+		if (screen[0]==0x00&&screen[1]==digit[0])screen[1]=0x00;
 		screen[2] = digit[temp];
 	}
 }
@@ -333,7 +334,7 @@ void btnsread(void)
 	static uint8_t btn_prev = BTN_MASK;		//Предыдущие нажатые кнопки.
 	uint8_t btn_curr = PINB&BTN_MASK;		//Текущие нажатые кнопки.
 	
-	
+	//Секция проверки кнопок. Настроено срабатывание после отпускания, либо после достижения порога таймера.
 	if (btn_prev==BTN_MASK)					//Если на предыдущем шаге не было нажато кнопок
 	{
 		btn_prev = btn_curr;				//Записываем текущие показания
@@ -348,11 +349,11 @@ void btnsread(void)
 		{
 			return;							//Не переполнился, выходим.
 		}else{
-			hold_timer = 0;					//Переполнился. Обнуляем.
-			step = 40;						//Увеличиваем шаг изменения.
+			hold_timer = HOLD_TIMER_MAX-1;	//Переполнился. Обнуляем.
+			//step = 40;						//Увеличиваем шаг изменения.
 		}
 	}
-
+//if (hold_timer>0&&step==4)return;
 //Ниже идет отработка кнопок. Если программа сюда дошла, значит была нажата, а потом отпущена кнопка.
 //Кнопки работают по отпусканию, а не по нажатию. Это исключает вариации "Двойного" нажатия
 	if (flags&NORMAL_MODE)
@@ -373,7 +374,7 @@ void btnsread(void)
 					flags |=NORMAL_MODE;				//Включаем обычный режим
 					set_temp = sel_temp;				//Задаем температуру для нагрева.
 					ATOMIC_BLOCK(ATOMIC_RESTORESTATE){	//Записываем в EEPROM новую температуру
-						int16_t eeprom_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Читаем температуру из EEPROM
+						uint16_t eeprom_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Читаем температуру из EEPROM
 						eeprom_temp <<=8;
 						eeprom_temp |=EEPROM_read(DEFAULT_TEMP_LBYTE);		
 						if (eeprom_temp!=sel_temp){		//Если значение установленной температуры отличается от того, что есть в EEPROM - перезаписываем.
@@ -383,10 +384,10 @@ void btnsread(void)
 					}
 				break;
 			case BTN2:								//Кнопка +
-				if (sel_temp<=MAX_TEMP-step)sel_temp+=step;
+				if (sel_temp<=(uint16_t)(MAX_TEMP-step))sel_temp+=step;
 				break;
 			case BTN3:								//Кнопка -
-				if (sel_temp>=(MIN_TEMP+step))sel_temp-=step;
+				if (sel_temp>=(uint16_t)(MIN_TEMP+step))sel_temp-=step;
 				break;
 			case BTN4:								//Кнопка ESC (Выход без сохранения)
 				flags &=~(TEMPERATURE_SET_MODE);	//Выключаем режим выбора температуры
@@ -397,7 +398,6 @@ void btnsread(void)
 	}
 	btn_prev = btn_curr;
 }
-
 
 
 
