@@ -102,7 +102,7 @@ int main(void)
 	PORTC = 8;_delay_ms(250);
 	PORTC = 0;_delay_ms(250);
 	PORTC = 7;_delay_ms(1000);
-	PORTC = 0;//_delay_ms(1000);
+	PORTC = 0;
 	PORTA = 0x7f;
 	
 	
@@ -111,7 +111,7 @@ int main(void)
 		sel_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Температура по-умолчанию старший байт
 		sel_temp <<=8;
 		sel_temp |=EEPROM_read(DEFAULT_TEMP_LBYTE);		//Температура по-умолчанию младший байт
-		if(sel_temp>MAX_TEMP)sel_temp=MAX_TEMP/2;		//Защита от чистого EEPROM. С новья будет на середине диапазона.
+		if(sel_temp>MAX_TEMP)sel_temp=500;		//Защита от чистого EEPROM. С новья будет на 500.
 	}
 	
 	SPI_init();		//Инициализация аппаратного SPI
@@ -261,71 +261,7 @@ void prnt(void){
 				digit_num=0;	
 	}
 }
-/*void btnsread(void){
-	
-	static uint16_t idle;
-	static uint8_t btn_state;
-	
-	if (btn_state==(PINB&BTN_MASK))
-	{
-		if(btn_state==BTN_MASK) {						
-			if (flags&TEMPERATURE_SET_MODE){			
-				idle++;									
-				if (idle>IDLE_DELAY){					 
-					flags &=~(TEMPERATURE_SET_MODE);	
-					flags |=NORMAL_MODE;				
-					if (set_temp)sel_temp=set_temp;					
-				}
-			}
-		}
-		return;
-	} else{
-		btn_state = PINB&BTN_MASK;
-		idle=0;											//������ ����� ������ - ���������� ������� �������
-	}
-	if (flags&NORMAL_MODE){
-		switch (btn_state){
-			case BTN1:
-				flags &=~(NORMAL_MODE);			//��������� ������� �����
-				flags |=TEMPERATURE_SET_MODE;	//��������� � ����� ��������� �����������
-				break;
-	}
-	}else if(flags&TEMPERATURE_SET_MODE){
-		switch (btn_state){
-			case BTN4:
-				sel_temp+=100;
-				if (sel_temp>=1000) sel_temp%=1000;
-				break;
-			case BTN3:
-				sel_temp+=10;
-				if ((sel_temp%100)<10) sel_temp-=100;
-				break;
-			case BTN2:
-				sel_temp+=1;
-				if((sel_temp%10)==0) sel_temp-=10;
-				break;
-			case BTN1:
-				flags &=~(TEMPERATURE_SET_MODE);	//��������� ����� ��������� �����������
-				flags |=NORMAL_MODE;				//��������� � ������� �����
-				set_temp = sel_temp<<2;
 
-				ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-					int16_t eeprom_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Читаем температуру из EEPROM
-					eeprom_temp <<=8;
-					eeprom_temp |=EEPROM_read(DEFAULT_TEMP_LBYTE);		
-					if (eeprom_temp!=sel_temp){					//Если значение установленной температуры отличается от того, что есть в EEPROM - перезаписываем.
-						EEPROM_write(DEFAULT_TEMP_HBYTE, (unsigned char)(sel_temp>>8));
-						EEPROM_write(DEFAULT_TEMP_LBYTE,(unsigned char)sel_temp);	
-					}
-				}
-
-				break;
-	}
-	}else if (flags&ENGENEER_MODE){
-		
-	}
-
-}*/
 void btnsread(void)
 {
 
@@ -341,7 +277,6 @@ void btnsread(void)
 		hold_timer = 0;						//Сбрасываем таймер
 		return;								//Выходим
 	}
-
 	if(btn_curr==btn_prev)					//Если показания не поменялись
 	{
 		hold_timer++;						//Приращиваем таймер пока не переполнится
@@ -349,11 +284,9 @@ void btnsread(void)
 		{
 			return;							//Не переполнился, выходим.
 		}else{
-			hold_timer = HOLD_TIMER_MAX-1;	//Переполнился. Обнуляем.
-			//step = 40;						//Увеличиваем шаг изменения.
+			hold_timer = HOLD_TIMER_MAX-1;	//Переполнился. Даем малую задержку, чтобы следующее срабатывание было очень скоро.
 		}
 	}
-//if (hold_timer>0&&step==4)return;
 //Ниже идет отработка кнопок. Если программа сюда дошла, значит была нажата, а потом отпущена кнопка.
 //Кнопки работают по отпусканию, а не по нажатию. Это исключает вариации "Двойного" нажатия
 	if (flags&NORMAL_MODE)
@@ -398,8 +331,6 @@ void btnsread(void)
 	}
 	btn_prev = btn_curr;
 }
-
-
 
 void read_temp (void){
 	static int16_t filtered_data;
