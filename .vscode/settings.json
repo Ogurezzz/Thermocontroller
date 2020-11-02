@@ -1,9 +1,0 @@
-{
-    "AVR.source.compiler": "/usr/bin/avr-gcc",
-    "AVR.programmer.tool": "/usr/bin/avrdude",
-    "AVR.programmer.definitions": "/etc/avrdude.conf",
-    "AVR.source.libraries": [],
-    "AVR.device.type": "atmega16",
-    "AVR.device.frequency": 1000000,
-    "AVR.programmer.type": "usbasp"
-}

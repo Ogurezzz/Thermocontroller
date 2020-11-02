@@ -5,12 +5,9 @@
             "intelliSenseMode": "${default}",
             "cStandard": "c11",
             "cppStandard": "c++14",
-            "compilerPath": "/usr/bin/avr-gcc",
+            "compilerPath": "",
             "includePath": [],
-            "compilerArgs": [
-                "-mmcu=atmega16",
-                "-DF_CPU=1000000UL"
-            ]
+            "compilerArgs": []
         }
     ],
     "version": 4
