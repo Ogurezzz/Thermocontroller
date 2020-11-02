@@ -8,3 +8,4 @@ Work modes
   3. PID mode   (TODO)
 
 Engineer menu: Hold ESC key during boot sequence.
+Schematics and PCB: https://easyeda.com/gurevoleg/retorta
