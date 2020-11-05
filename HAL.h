@@ -9,6 +9,9 @@
 #ifndef HAL_H_
 #define HAL_H_
 
+//#include "stdint.h"
+#include "pid.h"
+
 //Настроки и основные константы
 #define MAX_CS_PIN 0
 #define SCREEN_UPDATE_DELAY 5
@@ -18,6 +21,9 @@
 #define SCREEN_BLINK_DELAY 200
 #define IDLE_DELAY 5000/BUTTONS_READ_DELAY
 #define TEMP_READ_DELAY 250
+#define PID_TIME_DELAY 150
+#define PID_PWM_DELAY  MAX_PID_VAL
+#define PID_MIN_PULSE_WIDTH 20
 
 #define HYSTERESIS_MAX 3
 #define HYSTERESIS_MIN 3
@@ -28,6 +34,7 @@
 #define HOLD_TIMER_MAX 20   //Таймер удержания кнопки (в тактак чтения BUTTONS_READ_DELAY)
 
 #define FILTER_FACTOR 6
+
 
 //Флаги состояния.
 #define NORMAL_MODE 1
@@ -61,7 +68,19 @@
 //EEPROM ADRESSES
 #define DEFAULT_TEMP_HBYTE          0x00
 #define DEFAULT_TEMP_LBYTE          0x01
+#define PID_P_K_HBYTE               0x10
+#define PID_P_K_LBYTE               0x11
+#define PID_I_K_HBYTE               0x12
+#define PID_I_K_LBYTE               0x13
+#define PID_D_K_HBYTE               0x14
+#define PID_D_K_LBYTE               0x15
+
 #define TEMPERATURE_CONTROL_MODE    0x02
 
+//DEFAULT VALUES
+#define DEFAULT_SEL_TEMP            128
+#define PID_P_K_DEFAULT             256
+#define PID_I_K_DEFAULT             0
+#define PID_D_K_DEFAULT             0
 
 #endif /* HAL_H_ */

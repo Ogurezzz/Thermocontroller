@@ -42,25 +42,38 @@ uint16_t curr_temp = 0;								//Текущая измеренная темпе�
 uint16_t menuNum = 0;								//Номер текущего меню (Инженерный режим)
 uint8_t lastAct = 0;								//Хоранит значение предыдущего действия (для использования в пределах)
 
-//Простой менеджер задач на базе массива.
-uint32_t timerManager[5] = {SCREEN_UPDATE_DELAY,
+struct PID_DATA pidData;							//! Структура с параметрами PID регулятора.
+int16_t inputValue = 0;								//Значение, просчитанное PID регулятором.
+int16_t pK = 0;										//P-Коэффициент
+int16_t iK = 0;										//I-Коэффициент
+int16_t dK = 0;										//D-Коэффициент
+
+/*! \brief Простой менеджер задач на базе массива.
+*/
+uint32_t timerManager[7] = {SCREEN_UPDATE_DELAY,
 							POINT_FLASH_DELAY,
 							BUTTONS_READ_DELAY,
 							SCREEN_BLINK_DELAY,
-							TEMP_READ_DELAY}; 
+							TEMP_READ_DELAY,
+							PID_TIME_DELAY,
+							PID_PWM_DELAY}; 
+
 
 //Прототипы используемых в программе функций
 void tick(void);			//Тик таймера. Настроен на 1мс по привычке.
 void prnt(void);			//Вывод на экранзначения из массива screen[]. 
 void btnsread(void);		//Чтение нажатых кнопочек.
-//void heater_shift(void);	//
 void read_temp (void);		//Чтение текущей температуры из MAX6675
 void convert_temp(uint16_t temp);
-//void set_default_temp(void); //Установка температуры по умолчанию после загрузки (Инженерный режим)
 void SPI_init(void);		//Инициализация аппаратного SPI
 int16_t max6675_read(void); //Читаем температуру.
 void EEPROM_write(unsigned int uiAddress, unsigned char ucData); //Запись в EEPROM
 unsigned char EEPROM_read(unsigned int uiAddress);				 //Чтение из EEPROM
+void pSelect(void);
+void iSelect(void);
+void dSelect(void);
+
+
 inline void RunTimer (void)
 {
 	TCCR2 = 1<<WGM21|2<<CS20; 				// Настройка счетчика с предделителем=8
@@ -81,6 +94,12 @@ void convert_temp(uint16_t temp){
 		screen[2] = digit[temp];
 	}
 }
+//Функции PID регулятора
+int16_t Get_Reference(void);
+int16_t Get_Measurement(void);
+void Set_Input(int16_t inputValue);
+
+
 ISR(TIMER2_COMP_vect)
 {
 	tick();
@@ -101,22 +120,37 @@ int main(void)
 	PORTC = 4;_delay_ms(250);
 	PORTC = 8;_delay_ms(250);
 	PORTC = 0;_delay_ms(250);
-	PORTC = 7;_delay_ms(1000);
-	PORTC = 0;
-	PORTA = 0x7f;
-	
 	
 	//Вычитываем данные настроек из EEPROM
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
 		sel_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Температура по-умолчанию старший байт
 		sel_temp <<=8;
 		sel_temp |=EEPROM_read(DEFAULT_TEMP_LBYTE);		//Температура по-умолчанию младший байт
-		if(sel_temp>MAX_TEMP)sel_temp=500;		//Защита от чистого EEPROM. С новья будет на 500.
+		if(sel_temp>MAX_TEMP)sel_temp=DEFAULT_SEL_TEMP;		//Защита от чистого EEPROM. С новья будет на 500.
+		pK = EEPROM_read(PID_P_K_HBYTE);
+		pK <<=8;
+		pK|= EEPROM_read(PID_P_K_LBYTE);
+		if ((pK>=MAX_TEMP)||(pK<0)) pK = PID_P_K_DEFAULT;
+		iK = EEPROM_read(PID_I_K_HBYTE);
+		iK <<=8;
+		iK|= EEPROM_read(PID_I_K_LBYTE);
+		if ((iK>=MAX_TEMP)||(iK<0)) iK = PID_I_K_DEFAULT;
+		dK = EEPROM_read(PID_D_K_HBYTE);
+		dK <<=8;
+		dK|= EEPROM_read(PID_D_K_LBYTE);
+		if ((dK>=MAX_TEMP)||(dK<0)) dK = PID_D_K_DEFAULT;
 	}
-	
-	SPI_init();		//Инициализация аппаратного SPI
 
-	//Если зажать левую кнопку (Назад) - то будет загрузка в инженерное меню.
+
+	//Инициализация аппаратного SPI
+	SPI_init();		
+	//Инициализация PID алгоритма
+	pid_Init(pK, iK, dK, &pidData);
+
+	PORTC = 7;_delay_ms(1000);
+	PORTC = 0;
+	PORTA = 0x7f;
+	//Если зажать левую кнопку (ESC) - то будет загрузка в инженерное меню.
 	if((PINB&BTN_MASK)==BTN4){
 		flags=ENGENEER_MODE;
 		menuNum = 1;
@@ -129,7 +163,8 @@ int main(void)
 //------------------------------------------------------------------	
 //Процедуры инженерного меню.
 //------------------------------------------------------------------
-	while (flags==ENGENEER_MODE){
+	while (flags==ENGENEER_MODE)
+	{
 		//------------------------------------------------------------------
 		if (timerManager[0]>=SCREEN_UPDATE_DELAY){
 			prnt();
@@ -142,19 +177,21 @@ int main(void)
 				case 2:memccpy(screen,PID,0,3);break;
 				case 3:memccpy(screen,HYS,0,3);break;
 				case 4:memccpy(screen,CAL,0,3);break;
-				//case 10:set_default_temp();break;//Выбор температуры по-умолчанию
 				case 10:memccpy(screen,PID,0,3);break;
 				case 11:memccpy(screen,HYS,0,3);break;
 				case 12:memccpy(screen,REL,0,3);break;
 				case 20:memccpy(screen,SET,0,3);break;
-				case 21:memccpy(screen,CAL,0,3);break;
+//				case 21:memccpy(screen,CAL,0,3);break;
 				case 30:memccpy(screen,MAX,0,3);break;
 				case 31:memccpy(screen,MIN,0,3);break;
 				case 40:convert_temp(0);break;
 				case 41:convert_temp(500);break;
 				case 200:memccpy(screen,PID_P,0,3);break;
+				case 2000:pSelect();break;
 				case 201:memccpy(screen,PID_I,0,3);break;
+				case 2010:iSelect();break;
 				case 202:memccpy(screen,PID_D,0,3);break;
+				case 2020:dSelect();break;
 				default:
 					if(lastAct==1)menuNum/=10;
 					if(lastAct==2)menuNum--;
@@ -195,7 +232,7 @@ int main(void)
 			timerManager[0]=0;
 		}
 //------------------------------------------------------------------
-		if (timerManager[1]>=POINT_FLASH_DELAY){
+		/*if (timerManager[1]>=POINT_FLASH_DELAY){
 			if (set_temp){
 				if (curr_temp>(set_temp+HYSTERESIS_MAX)){
 					PORTA &= ~(1<<7);
@@ -207,22 +244,26 @@ int main(void)
 				}
 			}
 			timerManager[1]=0;
-		}
+		}*/
 //------------------------------------------------------------------
 		if(timerManager[2]>=BUTTONS_READ_DELAY){
 			btnsread();
 			timerManager[2]=0;
 		}
 //------------------------------------------------------------------		
-		if (timerManager[3]>=SCREEN_BLINK_DELAY){
-			if (flags&TEMPERATURE_SET_MODE)	{
+		if (timerManager[3]>=SCREEN_BLINK_DELAY)
+		{
+			if (flags&TEMPERATURE_SET_MODE)	
+			{
 				flags ^= SCREEN_OFF_STATE;
-				if (flags&SCREEN_OFF_STATE){
+				if (flags&SCREEN_OFF_STATE)
+				{
 					screen[0]=0x00;screen[1]=0x00;screen[2]=0x00;
-					}else{
+				}else{
 					convert_temp(sel_temp);
 				}
-				}else {
+			}else
+			{
 				flags &= ~(SCREEN_OFF_STATE);
 				convert_temp(curr_temp);
 			}
@@ -233,11 +274,44 @@ int main(void)
 			read_temp();
 			timerManager[4]=0;
 		}
+//------------------------------------------------------------------
+		if (timerManager[5]>=PID_TIME_DELAY)
+		{
+			if (set_temp>0)
+			{
+				//referenceValue = Get_Reference();
+      			//measurementValue = Get_Measurement();
+
+      			inputValue = (pid_Controller(set_temp, curr_temp, &pidData));
+				if (inputValue<0) inputValue=0;
+      			//Set_Input(inputValue);
+			}
+			timerManager[5]=0;
+		}
+//----Программный ШИМ---------------------
+		if (timerManager[6]>=PID_PWM_DELAY)
+		{
+			timerManager[6]=0;
+		}
+		//if (set_temp>0)
+		//{
+			if ((timerManager[6]< (uint16_t)inputValue)||((timerManager[6]<PID_MIN_PULSE_WIDTH)&&(inputValue>0)))
+			{
+				PORTA |= (1<<7);
+				PORTC |= (1<<3);
+			}else
+			{
+				PORTA &= ~(1<<7);
+				PORTC &= ~(1<<3);
+			}
+		//}
+		
+
     }
 	wdt_reset();
 }
 void tick(void){
-	for (uint8_t i=0;i<5;i++)
+	for (uint8_t i=0;i<7;i++)
 	{
 		timerManager[i]++;
 	}
@@ -261,7 +335,6 @@ void prnt(void){
 				digit_num=0;	
 	}
 }
-
 void btnsread(void)
 {
 
@@ -306,6 +379,7 @@ void btnsread(void)
 					flags &=~(TEMPERATURE_SET_MODE);	//Выключаем режим выбора температуры
 					flags |=NORMAL_MODE;				//Включаем обычный режим
 					set_temp = sel_temp;				//Задаем температуру для нагрева.
+					pid_Reset_Integrator(&pidData);
 					ATOMIC_BLOCK(ATOMIC_RESTORESTATE){	//Записываем в EEPROM новую температуру
 						uint16_t eeprom_temp = EEPROM_read(DEFAULT_TEMP_HBYTE);		//Читаем температуру из EEPROM
 						eeprom_temp <<=8;
@@ -331,7 +405,6 @@ void btnsread(void)
 	}
 	btn_prev = btn_curr;
 }
-
 void read_temp (void){
 	static int16_t filtered_data;
 	int16_t raw_data = max6675_read();
@@ -389,4 +462,246 @@ unsigned char EEPROM_read(unsigned int uiAddress){
 	EECR |= (1<<EERE);
 	/* Return data from data register */
 	return EEDR;
+}
+/*! \brief Read reference value.
+ *
+ * This function must return the reference value.
+ * May be constant or varying
+ */
+int16_t Get_Reference(void)
+{
+  return set_temp;
+}
+/*! \brief Read system process value
+ *
+ * This function must return the measured data
+ */
+int16_t Get_Measurement(void)
+{
+  return curr_temp;
+}
+/*! \brief Выбор пропорционального коэффициента
+ *
+ */
+void pSelect(void){
+	PORTA &= ~(1<<7);		//Выключаем точки
+	uint8_t hold_timer=0;				//Количество циклов удержания
+	uint8_t btn_prev = BTN_MASK;		//Предыдущие нажатые кнопки.
+	int16_t pK_local = pK;
+	while (1)
+	{
+		while (1)
+		{
+			if (timerManager[0]>=SCREEN_UPDATE_DELAY)
+			{
+				convert_temp(pK_local<<2);
+				prnt();
+				timerManager[0]=0;
+			}
+			if(timerManager[2]>=BUTTONS_READ_DELAY)
+			{
+				timerManager[2]=0;
+				uint8_t step=1;							//Шаг приращения температуры с учетом сдвига влево (1<<2=4)
+				uint8_t btn_curr = PINB&BTN_MASK;		//Текущие нажатые кнопки.
+				//Секция проверки кнопок. Настроено срабатывание после отпускания, либо после достижения порога таймера.
+				if (btn_prev==BTN_MASK)					//Если на предыдущем шаге не было нажато кнопок
+				{
+					btn_prev = btn_curr;				//Записываем текущие показания
+					hold_timer = 0;						//Сбрасываем таймер
+					break;								//Выходим
+				}
+				if(btn_curr==btn_prev)					//Если показания не поменялись
+				{
+					hold_timer++;						//Приращиваем таймер пока не переполнится
+					if (hold_timer<HOLD_TIMER_MAX)		//Проверяем переполнение таймера
+					{
+						break;							//Не переполнился, выходим.
+					}else{
+						hold_timer = HOLD_TIMER_MAX-1;	//Переполнился. Даем малую задержку, чтобы следующее срабатывание было очень скоро.
+					}
+				}
+			//Ниже идет отработка кнопок. Если программа сюда дошла, значит была нажата, а потом отпущена кнопка.
+			//Кнопки работают по отпусканию, а не по нажатию. Это исключает вариации "Двойного" нажатия
+					switch (btn_prev)
+					{
+						case BTN1:								//Кнопка Enter (Сохранение настройки)
+								ATOMIC_BLOCK(ATOMIC_RESTORESTATE){	
+									int16_t eeprom_temp = EEPROM_read(PID_P_K_HBYTE);		
+									eeprom_temp <<=8;
+									eeprom_temp |=EEPROM_read(PID_P_K_LBYTE);		
+									if (eeprom_temp!=pK_local){		
+										EEPROM_write(PID_P_K_HBYTE, (unsigned char)(pK_local>>8));
+										EEPROM_write(PID_P_K_LBYTE,(unsigned char)pK_local);	
+									}
+								}
+								pK=pK_local;
+								menuNum/=10;
+								return;
+							break;
+						case BTN2:								//Кнопка +
+							pK_local+=step;
+							if (pK_local>MAX_TEMP) pK_local=MAX_TEMP;
+							break;
+						case BTN3:								//Кнопка -
+							pK_local-=step;
+							if (pK_local<0) pK_local=0;
+							break;
+						case BTN4:								//Кнопка ESC (Выход без сохранения)
+							menuNum/=10;
+							return;
+						default:
+							break;
+					}
+				btn_prev = btn_curr;
+			}
+		}
+	}
+}
+void iSelect(void){
+	PORTA &= ~(1<<7);		//Выключаем точки
+	uint8_t hold_timer=0;				//Количество циклов удержания
+	uint8_t btn_prev = BTN_MASK;		//Предыдущие нажатые кнопки.
+	int16_t iK_local = iK;
+	while (1)
+	{
+		while (1)
+		{
+			if (timerManager[0]>=SCREEN_UPDATE_DELAY)
+			{
+				convert_temp(iK_local<<2);
+				prnt();
+				timerManager[0]=0;
+			}
+			if(timerManager[2]>=BUTTONS_READ_DELAY)
+			{
+				timerManager[2]=0;
+				uint8_t step=1;							//Шаг приращения температуры с учетом сдвига влево (1<<2=4)
+				uint8_t btn_curr = PINB&BTN_MASK;		//Текущие нажатые кнопки.
+				//Секция проверки кнопок. Настроено срабатывание после отпускания, либо после достижения порога таймера.
+				if (btn_prev==BTN_MASK)					//Если на предыдущем шаге не было нажато кнопок
+				{
+					btn_prev = btn_curr;				//Записываем текущие показания
+					hold_timer = 0;						//Сбрасываем таймер
+					break;								//Выходим
+				}
+				if(btn_curr==btn_prev)					//Если показания не поменялись
+				{
+					hold_timer++;						//Приращиваем таймер пока не переполнится
+					if (hold_timer<HOLD_TIMER_MAX)		//Проверяем переполнение таймера
+					{
+						break;							//Не переполнился, выходим.
+					}else{
+						hold_timer = HOLD_TIMER_MAX-1;	//Переполнился. Даем малую задержку, чтобы следующее срабатывание было очень скоро.
+					}
+				}
+			//Ниже идет отработка кнопок. Если программа сюда дошла, значит была нажата, а потом отпущена кнопка.
+			//Кнопки работают по отпусканию, а не по нажатию. Это исключает вариации "Двойного" нажатия
+					switch (btn_prev)
+					{
+						case BTN1:								//Кнопка Enter (Сохранение настройки)
+								ATOMIC_BLOCK(ATOMIC_RESTORESTATE){	
+									int16_t eeprom_temp = EEPROM_read(PID_I_K_HBYTE);		
+									eeprom_temp <<=8;
+									eeprom_temp |=EEPROM_read(PID_I_K_LBYTE);		
+									if (eeprom_temp!=iK_local){		
+										EEPROM_write(PID_I_K_HBYTE, (unsigned char)(iK_local>>8));
+										EEPROM_write(PID_I_K_LBYTE,(unsigned char)iK_local);	
+									}
+								}
+								iK=iK_local;
+								menuNum/=10;
+								return;
+							break;
+						case BTN2:								//Кнопка +
+							iK_local+=step;
+							if (iK_local>MAX_TEMP) iK_local=MAX_TEMP;
+							break;
+						case BTN3:								//Кнопка -
+							iK_local-=step;
+							if (iK_local<0) iK_local=0;
+							break;
+						case BTN4:								//Кнопка ESC (Выход без сохранения)
+							menuNum/=10;
+							return;
+						default:
+							break;
+					}
+				btn_prev = btn_curr;
+			}
+		}
+	}
+}
+void dSelect(void){
+	PORTA &= ~(1<<7);		//Выключаем точки
+	uint8_t hold_timer=0;				//Количество циклов удержания
+	uint8_t btn_prev = BTN_MASK;		//Предыдущие нажатые кнопки.
+	int16_t dK_local = dK;
+	while (1)
+	{
+		while (1)
+		{
+			if (timerManager[0]>=SCREEN_UPDATE_DELAY)
+			{
+				convert_temp(dK_local<<2);
+				prnt();
+				timerManager[0]=0;
+			}
+			if(timerManager[2]>=BUTTONS_READ_DELAY)
+			{
+				timerManager[2]=0;
+				uint8_t step=1;							//Шаг приращения температуры с учетом сдвига влево (1<<2=4)
+				uint8_t btn_curr = PINB&BTN_MASK;		//Текущие нажатые кнопки.
+				//Секция проверки кнопок. Настроено срабатывание после отпускания, либо после достижения порога таймера.
+				if (btn_prev==BTN_MASK)					//Если на предыдущем шаге не было нажато кнопок
+				{
+					btn_prev = btn_curr;				//Записываем текущие показания
+					hold_timer = 0;						//Сбрасываем таймер
+					break;								//Выходим
+				}
+				if(btn_curr==btn_prev)					//Если показания не поменялись
+				{
+					hold_timer++;						//Приращиваем таймер пока не переполнится
+					if (hold_timer<HOLD_TIMER_MAX)		//Проверяем переполнение таймера
+					{
+						break;							//Не переполнился, выходим.
+					}else{
+						hold_timer = HOLD_TIMER_MAX-1;	//Переполнился. Даем малую задержку, чтобы следующее срабатывание было очень скоро.
+					}
+				}
+			//Ниже идет отработка кнопок. Если программа сюда дошла, значит была нажата, а потом отпущена кнопка.
+			//Кнопки работают по отпусканию, а не по нажатию. Это исключает вариации "Двойного" нажатия
+					switch (btn_prev)
+					{
+						case BTN1:								//Кнопка Enter (Сохранение настройки)
+								ATOMIC_BLOCK(ATOMIC_RESTORESTATE){	
+									int16_t eeprom_temp = EEPROM_read(PID_D_K_HBYTE);		
+									eeprom_temp <<=8;
+									eeprom_temp |=EEPROM_read(PID_D_K_LBYTE);		
+									if (eeprom_temp!=dK_local){		
+										EEPROM_write(PID_D_K_HBYTE, (unsigned char)(dK_local>>8));
+										EEPROM_write(PID_D_K_LBYTE,(unsigned char)dK_local);	
+									}
+								}
+								dK=dK_local;
+								menuNum/=10;
+								return;
+							break;
+						case BTN2:								//Кнопка +
+							dK_local+=step;
+							if (dK_local>MAX_TEMP) dK_local=MAX_TEMP;
+							break;
+						case BTN3:								//Кнопка -
+							dK_local-=step;
+							if (dK_local<0) dK_local=0;
+							break;
+						case BTN4:								//Кнопка ESC (Выход без сохранения)
+							menuNum/=10;
+							return;
+						default:
+							break;
+					}
+				btn_prev = btn_curr;
+			}
+		}
+	}
 }
