@@ -246,7 +246,8 @@ int main(void)
 			timerManager[1]=0;
 		}*/
 //------------------------------------------------------------------
-		if(timerManager[2]>=BUTTONS_READ_DELAY){
+		if (timerManager[2]>BUTTONS_READ_DELAY)
+		{
 			btnsread();
 			timerManager[2]=0;
 		}
@@ -279,12 +280,8 @@ int main(void)
 		{
 			if (set_temp>0)
 			{
-				//referenceValue = Get_Reference();
-      			//measurementValue = Get_Measurement();
-
       			inputValue = (pid_Controller(set_temp, curr_temp, &pidData));
 				if (inputValue<0) inputValue=0;
-      			//Set_Input(inputValue);
 			}
 			timerManager[5]=0;
 		}
@@ -293,8 +290,6 @@ int main(void)
 		{
 			timerManager[6]=0;
 		}
-		//if (set_temp>0)
-		//{
 			if ((timerManager[6]< (uint16_t)inputValue)||((timerManager[6]<PID_MIN_PULSE_WIDTH)&&(inputValue>0)))
 			{
 				PORTA |= (1<<7);
@@ -304,9 +299,6 @@ int main(void)
 				PORTA &= ~(1<<7);
 				PORTC &= ~(1<<3);
 			}
-		//}
-		
-
     }
 	wdt_reset();
 }
