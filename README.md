@@ -5,7 +5,7 @@ Simple themocontroller. Features:
 Work modes  
   1. Relay mode (TODO)
   2. Hysteresis mode.
-  3. PID mode   (TODO)
+  3. PID mode   (Default)
 
 Engineer menu: Hold ESC key during boot sequence.
 Schematics and PCB: https://easyeda.com/gurevoleg/retorta
