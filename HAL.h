@@ -8,8 +8,14 @@
 
 #ifndef HAL_H_
 #define HAL_H_
-
-//#include "stdint.h"
+//Подключаем библиотеки к проекту.
+#include <avr/io.h>
+#include <util/delay.h>
+#include <util/atomic.h>
+#include <stdio.h>
+#include <avr/interrupt.h>
+#include <avr/wdt.h>
+#include <string.h>
 #include "pid.h"
 
 //Настроки и основные константы
